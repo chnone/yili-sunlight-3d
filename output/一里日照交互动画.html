@@ -487,7 +487,8 @@ class SunOrbit {
     // feedback. Restore the higher-resolution buffer on release.
     const dragging=this.canvas.classList.contains('dragging');
     const maxWidth=dragging?800:selected.playing?1152:1340;
-    const maxRatio=dragging?1:1.5;
+    const narrowPlayback=selected.playing && cssW<=640;
+    const maxRatio=dragging||narrowPlayback?1:1.5;
     this.pixelRatio=Math.min(devicePixelRatio||1,maxRatio,maxWidth/cssW);
     const w=Math.max(1,Math.round(cssW*this.pixelRatio)),h=Math.max(1,Math.round(cssH*this.pixelRatio));
     if(w!==this.layer.width || h!==this.layer.height || !this.pixels) {
