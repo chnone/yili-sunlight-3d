@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 
 import numpy as np
 
-from sun_engine import Mesh, lit_intervals, solar_position, time_bins
+from sun_engine import Mesh, apparent_to_civil, lit_intervals, solar_position, time_bins
 from sun_model import DAYS, MODEL, OUTPUT, height, prisms, read_model, receivers, model_digest
 from sun_households import assign_addresses, export_households
 
@@ -28,7 +28,7 @@ COLUMNS = (
     "窗位对照偏移_m", "大寒偏西分钟", "大寒偏东分钟", "冬至偏西分钟", "冬至偏东分钟",
     "对照层高_m", "大寒层高对照分钟", "冬至层高对照分钟",
     "大寒保守分钟", "大寒乐观分钟", "冬至保守分钟", "冬至乐观分钟", "计算年份", "模型校验码",
-    "单元", "单元内户位",
+    "单元", "单元内户位", "大寒真太阳时分钟",
 )
 
 
@@ -109,6 +109,12 @@ def compute_rows(model, year):
         directions = [solar_position(mid, latitude, longitude).direction for _, _, mid in bins]
         states = np.column_stack([mesh.classify(coordinates, normals, direction) for direction in directions])
         minutes = (states == -1) @ weights
+        if day == "大寒":
+            apparent_directions = (solar_position(apparent_to_civil(mid, latitude, longitude),
+                                                  latitude, longitude).direction for _, _, mid in bins)
+            shifted = count_sun(mesh, coordinates, normals, apparent_directions, weights)
+            for record, value in zip(rows, shifted):
+                record["大寒真太阳时分钟"] = int(value)
         check_bins = time_bins(bins[0][0], bins[-1][1], step_minutes=1)
         check_suns = (solar_position(t, latitude, longitude).direction for _, _, t in check_bins)
         minute_check = count_sun(mesh, coordinates, normals, check_suns, [1]*len(check_bins))

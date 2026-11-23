@@ -37,6 +37,8 @@ def load_table(model, path):
         points = by_unit[bid,floor,unit]
         home = {"住宅楼层": floor, "户位": unit, "测点明细": points,
                 "单元": summary["单元"], "单元内户位": summary["单元内户位"]}
+        if "大寒真太阳时较弱点分钟" in summary:
+            home["大寒真太阳时分钟"] = summary["大寒真太阳时较弱点分钟"]
         for day in DAYS:
             col = day + "分钟"
             dark = min(points, key=lambda r: int(r[col]))
@@ -376,6 +378,16 @@ def report(model, groups, out, year):
         body+=["", f"- **{day} {limit//60} 小时筛查**　基准几何细化至 1 分钟采样后，有 {len(changed)} 个户位跨过阈值。"
                + ("例如"+near+"。" if near else "")
                + f"外楼从低值调至高值时有 {ex_flips} 个户位跨过阈值。改按 {alt:g} m 层高布置窗台，在 {len(alt_valid)} 个可比户位中有 {height_changed} 个跨过阈值。"]
+    if all("大寒真太阳时分钟" in home for home in all_homes):
+        cross = [home for home in all_homes if
+                 (home["大寒分钟"] >= 120) != (home["大寒真太阳时分钟"] >= 120)]
+        body += ["", "## 大寒的两种计时口径", "",
+                 f"按北京时间和当地真太阳时分别取 08:00–16:00，保持建筑与窗位相同，有 {len(cross)} 个户位的较弱测点跨过两小时筛查线。各户数据见逐户汇总。正式逐户判定还需实际房间、窗位和报审资料。[住宅项目规范表 3.1.2](https://ghzrzyw.beijing.gov.cn/biaozhunguanli/bzzl/202506/P020250609570099619169.pdf)"]
+        if cross:
+            body += ["", "| 户位 | 北京时间窗口，分钟 | 当地真太阳时窗口，分钟 |", "|---|---:|---:|"]
+            for home in cross:
+                name = f"{home['大寒最弱点']['楼号']} {home['住宅楼层']} 层{home_address(home)}"
+                body.append(f"| {name} | {home['大寒分钟']} | {home['大寒真太阳时分钟']} |")
     body+=["", "## 数据口径","",
            "- 户内较短值取自各测点独立累计的分钟数。逐户汇总另列「全部点同时直射」及「至少一点直射」的分钟数与时段，分别取各点见光区间的交集、并集。两个代表点在分户图核实前仅用于选房筛查，逐户日照合规还需核对实际窗位、居住空间和审查报告。",
            "- 时间取北京时间。太阳方向依据 NOAA 公式、经度与均时差计算。基准累计以 5 分钟中点判光，相邻见光区间合并。结果描述指定窗口的晴空直射。",

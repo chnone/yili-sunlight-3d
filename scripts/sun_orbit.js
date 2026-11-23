@@ -11,6 +11,7 @@ class SunOrbit {
     this.faces = [];
     this.edges = [];
     this.vertices = [];
+    this.shadingEpoch = 0;
     this.residentialWalls = new Map();
     for (const [owner, b] of this.owners.entries()) {
       for (const solid of [b, ...(b.parts || [])]) this.extrude(solid, owner);
@@ -211,14 +212,19 @@ class SunOrbit {
     const gradients=[];
     for(let i=0;i<faces.length;i++) {
       const face=faces[i];
-      if(SunOrbit.dot(face.normal,view.axes.toward)>1e-7)
-        SunOrbit.raster(coords,face.ids,w,h,this.z,faceMap,i,gradients);
+      if(SunOrbit.dot(face.normal,view.axes.toward)<=1e-7)continue;
+      const ids=face.ids,a=coords[ids[0]],b=coords[ids[1]],c=coords[ids[2]];
+      if(Math.max(a[0],b[0],c[0])<0 || Math.min(a[0],b[0],c[0])>=w ||
+         Math.max(a[1],b[1],c[1])<0 || Math.min(a[1],b[1],c[1])>=h)continue;
+      SunOrbit.raster(coords,face.ids,w,h,this.z,faceMap,i,gradients);
     }
     // Encode visible silhouette and roof edges separately. Keep edge ownership
     // identical to the solid behind it, including near closely stacked roofs.
     const err=1.15/(ratio*view.s);
     for(const [a,b,owner] of this.edges) {
       const p=coords[a],q=coords[b],dx=q[0]-p[0],dy=q[1]-p[1],dz=q[2]-p[2];
+      if(Math.max(p[0],q[0])<0||Math.min(p[0],q[0])>=w||
+         Math.max(p[1],q[1])<0||Math.min(p[1],q[1])>=h)continue;
       const steps=Math.ceil(Math.max(Math.abs(dx),Math.abs(dy)));if(!steps)continue;
       for(let i=0;i<=steps;i++){
         const t=i/steps, x=Math.floor(p[0]+dx*t),y=Math.floor(p[1]+dy*t);
@@ -288,14 +294,104 @@ class SunOrbit {
     }
   }
 
+  // Keep the depth-tested shadow calculation identical on both paths. During
+  // playback the worker owns its projection and solar atlas. Only the latest
+  // sun direction is queued while a frame is in flight.
+  static workerMain() {
+    const renderer=Object.create(SunOrbit.prototype);
+    self.onmessage=({data})=>{
+      if(data.geometry){
+        Object.assign(renderer,data.geometry);
+        renderer.owners=Array.from({length:data.ownerCount},()=>null);
+        return;
+      }
+      const {width,height,pose,buffer,epoch,key,direction}=data;
+      renderer.colors=buffer?new Uint32Array(buffer):new Uint32Array(width*height);
+      if(pose){
+        renderer.camera=pose.camera;renderer.span=pose.span;renderer.pixelRatio=pose.ratio;
+        const size=width*height;
+        if(renderer.z?.length!==size){
+          renderer.z=new Float32Array(size);renderer.ids=new Int32Array(size);renderer.faceMap=new Int32Array(size);
+        }
+        renderer.project(renderer.cameraView(pose.cssW,pose.cssH),width,height);
+        renderer.palette=pose.palette;
+      }
+      renderer.shade({direction},renderer.palette);
+      const pixels=renderer.colors.buffer;
+      self.postMessage({pixels,width,height,epoch,key},[pixels]);
+    };
+  }
+
+  startShadingWorker() {
+    if(this.shadingWorker)return true;
+    if(this.workerUnavailable||typeof Worker==='undefined')return false;
+    let url;
+    try {
+      const source='const SunOrbit='+SunOrbit.toString()+';SunOrbit.workerMain();';
+      url=URL.createObjectURL(new Blob([source],{type:'text/javascript'}));
+      const worker=this.shadingWorker=new Worker(url);
+      worker.onmessage=({data})=>{
+        if(this.shadingWorker!==worker)return;
+        this.workerBusy=false;this.returnedPixels=data.pixels;
+        if(this.workerFrame && data.epoch===this.shadingEpoch){
+          try {
+            const image=new ImageData(new Uint8ClampedArray(data.pixels),data.width,data.height);
+            this.ctx.putImageData(image,0,0);this.shadeKey=data.key;
+          } catch {
+            this.stopShadingWorker();
+            return;
+          }
+        }
+        this.sendShadingFrame();
+      };
+      worker.onerror=()=>this.stopShadingWorker();
+      worker.onmessageerror=()=>this.stopShadingWorker();
+      worker.postMessage({geometry:{vertices:this.vertices,faces:this.faces,edges:this.edges},ownerCount:this.owners.length});
+      return true;
+    } catch {
+      this.stopShadingWorker();
+      return false;
+    } finally {
+      if(url)URL.revokeObjectURL(url);
+    }
+  }
+
+  stopShadingWorker() {
+    this.workerUnavailable=true;
+    this.shadingWorker?.terminate();this.shadingWorker=null;this.workerBusy=false;
+    const frame=this.workerFrame;
+    this.workerFrame=null;this.returnedPixels=null;
+    if(frame){
+      this.shade(frame,this.palette);
+      this.ctx.putImageData(this.pixels,0,0);this.shadeKey=frame.key;
+    }
+  }
+
+  sendShadingFrame() {
+    const frame=this.workerFrame;
+    if(!frame || this.workerBusy || frame.key===this.shadeKey)return;
+    const {width,height}=this.layer,epoch=this.shadingEpoch;
+    const pose=this.sentEpoch===epoch?null:{
+      cssW:this.canvas.clientWidth,cssH:this.canvas.clientHeight,ratio:this.pixelRatio,
+      camera:this.camera,span:this.span,palette:this.palette
+    };
+    const buffer=this.returnedPixels?.byteLength===width*height*4?this.returnedPixels:null;
+    this.returnedPixels=null;this.workerBusy=true;this.sentEpoch=epoch;
+    try {
+      this.shadingWorker.postMessage({width,height,pose,buffer,epoch,...frame},buffer?[buffer]:[]);
+    } catch {
+      this.stopShadingWorker();
+    }
+  }
+
   draw(context,frame,selected,exterior,isContributor) {
     const cssW=this.canvas.clientWidth,cssH=this.canvas.clientHeight;
     // The labels and exact ray samples are independent from the colour raster.
     // While a pointer is moving, spend the frame budget on immediate camera
     // feedback. Restore the higher-resolution buffer on release.
     const dragging=this.canvas.classList.contains('dragging');
-    const maxWidth=dragging?960:selected.playing?1152:1340;
-    const maxRatio=dragging?1.25:1.5;
+    const maxWidth=dragging?800:selected.playing?1152:1340;
+    const maxRatio=dragging?1:1.5;
     this.pixelRatio=Math.min(devicePixelRatio||1,maxRatio,maxWidth/cssW);
     const w=Math.max(1,Math.round(cssW*this.pixelRatio)),h=Math.max(1,Math.round(cssH*this.pixelRatio));
     if(w!==this.layer.width || h!==this.layer.height || !this.pixels) {
@@ -312,7 +408,8 @@ class SunOrbit {
       this.projectionKey=cameraKey;
     }
     const paletteKey=[selected.day,selected.bid,exterior].join('|');
-    if(paletteKey!==this.paletteKey){
+    const paletteChanged=paletteKey!==this.paletteKey;
+    if(paletteChanged){
       this.palette=this.owners.map(b=>{
         if(b.kind==='bridge')return b.id===exterior?[85,80,128]:[100,110,137];
         if(b.id===exterior)return [172,89,52];
@@ -324,7 +421,15 @@ class SunOrbit {
       this.paletteKey=paletteKey;
     }
     const shadeKey=paletteKey+'|'+(frame.direction[2]>0?frame.direction.join(','):'below');
-    if(changed||shadeKey!==this.shadeKey){
+    const asyncShade=!context && selected.playing && !dragging && !changed && !paletteChanged &&
+      frame.direction[2]>0 && this.startShadingWorker();
+    if(!asyncShade && this.workerFrame){
+      ++this.shadingEpoch;this.workerFrame=null;
+    }
+    if(asyncShade){
+      this.workerFrame={key:shadeKey,direction:frame.direction};
+      this.sendShadingFrame();
+    }else if(changed||shadeKey!==this.shadeKey){
       this.shade(frame,this.palette);
       this.ctx.putImageData(this.pixels,0,0);
       this.shadeKey=shadeKey;

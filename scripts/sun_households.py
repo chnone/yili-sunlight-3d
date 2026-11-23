@@ -86,6 +86,8 @@ def summarize_households(point_rows):
                 summary[day+prefix+"时段"] = " / ".join(
                     f"{_format_minute(start)}–{_format_minute(end)}" for start,end in runs) or "无"
         passed = sum(int(r["大寒分钟"]) >= 120 for r in rows)
+        if "大寒真太阳时分钟" in rows[0]:
+            summary["大寒真太阳时较弱点分钟"] = min(int(r["大寒真太阳时分钟"]) for r in rows)
         summary.update({"大寒满2小时测点数":passed,"大寒全点均满2小时":"是" if passed==len(rows) else "否",
                         "计算年份":rows[0]["计算年份"], "模型校验码":rows[0]["模型校验码"]})
         if "单元" in rows[0]:

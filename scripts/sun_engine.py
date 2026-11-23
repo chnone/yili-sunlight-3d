@@ -57,6 +57,19 @@ def solar_position(moment, latitude, longitude):
                        np.array([east, north, up]), minutes)
 
 
+def apparent_to_civil(apparent, latitude, longitude):
+    """Return the zoned civil instant at the requested local apparent solar clock reading."""
+    offset = apparent.utcoffset()
+    if offset is None:
+        raise ValueError("真太阳时换算需要时区")
+    meridian = offset.total_seconds() / 240
+    civil = apparent
+    for _ in range(4):
+        equation = solar_position(civil, latitude, longitude).equation_of_time_minutes
+        civil = apparent - timedelta(minutes=4 * (longitude - meridian) + equation)
+    return civil
+
+
 def _cross(a, b):
     return a[..., 0] * b[..., 1] - a[..., 1] * b[..., 0]
 

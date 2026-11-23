@@ -43,35 +43,55 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 #rankMore{margin-top:10px;padding:6px 10px;color:var(--blue);background:#f4f7f5;border:1px solid var(--line);border-radius:4px;font-size:12px}.rank-method{margin-top:9px}
 @media(max-width:450px){#rankings{padding:12px}.rank-home{grid-template-columns:3.2em minmax(0,1fr) auto;gap:4px}.rank-home strong{font-size:12px}.day-nav{gap:10px}}
 .bridge-link{padding:3px 0;border:0;background:transparent;color:#495579;font:inherit;text-decoration:underline;text-underline-offset:2px}.bridge-link[hidden]{display:none}.key.bridge{width:17px;height:8px;border:0;border-top:3px solid #646e89;border-radius:0;background:linear-gradient(to right,transparent 15%,#646e89 15% 30%,transparent 30% 70%,#646e89 70% 85%,transparent 85%)}
+.zone{display:inline;white-space:nowrap}.address-part{display:inline-block;white-space:nowrap}
+#leaderLegend{min-height:34px}#map:focus-visible{outline:3px solid var(--blue);outline-offset:-3px}
+.method-block h3{font-size:13px;color:var(--ink);margin:12px 0 2px}.startup-note{padding:16px;border:1px solid var(--line);border-radius:8px;background:var(--card);line-height:1.6}.startup-note p{margin-bottom:8px}.startup-note a{color:var(--blue)}.startup-note button{margin-right:12px}
+.startup-failed .grid,.startup-failed .day-nav,.startup-failed .hint{display:none}
+@media(max-width:380px){.time{font-size:18px}.playline{gap:6px}.play{min-width:65px;padding:6px 8px}.zone{font-size:10px}}
 </style></head>
 <body><main class="wrap">
 <header><div><h1>一里南侧地块三维日照回放</h1><p id="subtitle">天津河西 · 南向窗台直射</p></div><div class="day-nav"><div id="dayTabs" class="tabs" role="group" aria-label="日期"></div><a class="rank-link" href="#rankings">看住户排行 ↓</a></div></header>
+<noscript><style>.grid,.day-nav,.hint{display:none}</style><p class="startup-note">播放三维日照动画需要 JavaScript。请在浏览器启用 JavaScript，然后重新打开本页。</p></noscript>
+<div id="startupError" class="startup-note" role="alert" hidden><p>动画未能启动。请重新加载页面。使用离线文件时，可以重新下载完整动画。</p><button type="button" id="retryStartup">重新加载</button><a href="https://github.com/chnone/yili-sunlight-3d/raw/refs/heads/main/output/一里日照交互动画.html">下载完整动画</a></div>
 <div class="grid">
 <section class="panel" aria-label="动画与播放控制">
 <div class="map-head"><h2>楼群与阴影</h2><div class="mode"><div class="switch" role="group" aria-label="视角"><button data-view="iso" aria-pressed="true">三维</button><button data-view="plan" aria-pressed="false">俯视</button></div><div class="switch" role="group" aria-label="范围"><button data-scope="site" aria-pressed="true">地块</button><button data-scope="all" aria-pressed="false">含周边</button></div></div></div>
 <div class="mapbox"><canvas id="map" tabindex="0" aria-label="三维日照模型，可拖动和缩放。方向键旋转，按住 Shift 平移，加减号缩放，Home 复位" aria-describedby="mapHint"></canvas><span id="hover" hidden></span><div class="compass"><svg viewBox="0 0 16 26" aria-hidden="true"><g id="north"><path d="M8 2 L13 20 L8 17 L3 20 Z" fill="#34535f"/><path d="M8 2 L8 17 L3 20 Z" fill="#a9b7ba"/></g></svg>北</div><div class="maptools" aria-label="相机控制"><button id="zoomOut" aria-label="缩小">−</button><button id="zoomIn" aria-label="放大">＋</button><button id="resetCam">复位</button></div></div>
 <div id="mapHint" class="maphint"></div>
-<div class="mapinfo"><span class="legend"><i class="key model"></i>住宅</span><span class="legend"><i class="key hit"></i>当日遮挡窗台的周边楼</span><span class="legend"><i class="key ext"></i>其他周边楼</span><button hidden type="button" id="bridgeLink" class="legend bridge-link" title="在三维图中查看西侧立交桥及模型尺寸"><i class="key bridge" aria-hidden="true"></i>西侧立交桥</button><span class="legend"><i class="dot"></i>窗台见光</span><span class="legend"><i class="dot dark"></i>窗台受遮</span><span class="legend"><i class="shadow-swatch"></i>阴影</span><button id="leaderLegend" type="button" class="legend" hidden aria-controls="map rankList"><i class="leader-swatch" aria-hidden="true"></i><span></span><b aria-hidden="true">×</b></button><span id="planeNote" class="mapnote"></span></div>
-<div class="transport"><div class="playline"><button id="play" class="play"></button><strong class="time" id="clock"></strong><span class="zone">北京时间</span><select id="speed" class="speed" aria-label="播放倍速"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></div><input id="scrub" class="slider" type="range" min="0" step="any" value="0" aria-label="日出至日落回放时间"><div class="ticks" id="ticks"></div></div>
+<div class="mapinfo"><span class="legend"><i class="key model"></i>住宅</span><span class="legend"><i class="key hit"></i>当天曾挡光的周边楼</span><span class="legend"><i class="key ext"></i>其他周边楼</span><button hidden type="button" id="bridgeLink" class="legend bridge-link" title="在三维图中查看西侧立交桥及模型尺寸"><i class="key bridge" aria-hidden="true"></i>西侧立交桥</button><span class="legend"><i class="dot"></i>窗台见光</span><span class="legend"><i class="dot dark"></i>窗台无直射</span><span class="legend"><i class="shadow-swatch"></i>阴影</span><button id="leaderLegend" type="button" class="legend" hidden aria-controls="map rankList"><i class="leader-swatch" aria-hidden="true"></i><span></span><b aria-hidden="true">×</b></button><span id="planeNote" class="mapnote"></span></div>
+<div class="transport"><div class="playline"><button id="play" class="play"></button><strong class="time" id="clock"></strong><span class="zone">北京时间</span><select id="speed" class="speed" aria-label="播放倍速" title="1× 时每秒推进 8 分钟"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></div><input id="scrub" class="slider" type="range" min="0" step="any" value="0" aria-label="日出至日落回放时间"><div class="ticks" id="ticks"></div></div>
 <div class="skyinfo"><span>太阳高度 <b id="alt"></b>　方位 <b id="az"></b></span><span id="sampleTime"></span></div>
 </section>
-<aside class="panel side"><div class="side-tabs" role="group" aria-label="观察对象"><button id="homesTab" aria-pressed="true">住宅窗台</button><button id="externalsTab" aria-pressed="false">周边楼高</button></div><div id="homePanel"><h2>观察住宅</h2><div class="fieldrow"><label>楼栋<select id="house"></select></label><label>住宅楼层<select id="floor"></select></label></div>
+<aside class="panel side"><div class="side-tabs" role="group" aria-label="观察对象"><button id="homesTab" aria-pressed="true">住宅窗台</button><button id="externalsTab" aria-pressed="false">周边楼高</button></div><div id="homePanel"><h2>观察住宅</h2><div class="fieldrow"><label>楼栋<select id="house"></select></label><label>住宅楼层<select id="floor" aria-describedby="floorHelp"></select></label></div>
+<p id="floorHelp" class="hint">楼层从首个住宅层起算，销售楼层和房号请核对分户图。</p>
 <div class="fieldrow door-fields"><label>单元<select id="entry"></select></label><label>单元内户位<select id="unit"></select></label></div>
 <div class="probes-head"><h2>南窗测点</h2><small id="until"></small></div><div id="probes"></div><p class="meta" id="homeMeta"></p><div class="external-actions"><button id="focusHome">聚焦这栋住宅</button></div></div>
-<div id="externalPanel" hidden><label>周边建筑与设施<select id="external"></select></label><div class="external-head"><h2 id="extName"></h2><small id="extId"></small></div><div class="external-height" id="extHeight"></div><p class="external-copy" id="extSpan"></p><p class="external-copy" id="extReview"></p><div class="external-copy" id="extSource"></div><p class="external-copy" id="extImpact"></p><div class="external-actions"><button id="focusExt">聚焦这栋建筑</button></div></div>
+<div id="externalPanel" hidden><label>周边建筑与设施<select id="external"></select></label><div class="external-head"><h2 id="extName"></h2><small id="extId"></small></div><div class="external-height" id="extHeight"></div><p class="external-copy" id="extSpan"></p><details id="extEvidence"><summary>楼高依据与资料来源</summary><p class="external-copy" id="extScenarios" hidden></p><p class="external-copy" id="extReview"></p><div class="external-copy" id="extSource"></div></details><p class="external-copy" id="extImpact"></p><details id="impactHelp"><summary>点·分钟怎么算</summary><p>两个南窗测点各被同一物体挡住 5 分钟，就累计 10 点·分钟。要知道某户因它少晒了多久，需要分别计算有、无该遮挡物两种情景。</p></details><div class="external-actions"><button id="focusExt">聚焦这栋建筑</button></div></div>
 </aside>
 <div class="panel day-results">
 <section id="rankings" aria-labelledby="rankTitle">
 <div class="rank-heading"><h2 id="rankTitle">全天日照最长的住户</h2><button id="highlightFirst" type="button" aria-pressed="false" aria-controls="map rankList"><i class="leader-swatch" aria-hidden="true"></i><span>高亮第一名</span></button></div><p id="rankSummary"></p><p id="rankHomes"></p>
 <ol id="rankList" aria-label="住户日照排行"></ol>
 <button id="rankMore" type="button" aria-controls="rankList" aria-expanded="false" hidden></button>
-<p class="rank-method">从日出算到日落，按每户各南窗测点的平均直射时长排名。点击一户可在三维图中查看。</p>
+<p class="rank-method" id="rankMethod"></p>
 </section>
-<details><summary>计算口径</summary><p>时间轴从当地日出播到日落，均为北京时间。太阳方向和楼影连续移动。窗台见光与遮挡按 5 分钟区间的中点射线判定，日出、日落附近的短区间单独采样。金色时段为模型直射时间。日出、日落按太阳上边缘升过或落到地平线的时刻计算；窗台射线指向太阳中心。太阳很低时，模型以外的远处建筑也可能挡光。</p><p>住宅首层从首个模型住宅层起算。主方案的窄楼只有一个单元，宽楼从东向西分成东单元和西单元。每个单元分东户和西户，每户南窗 A 点偏东、B 点偏西。分户边界与窗位按面宽推估。周边建筑和立交桥的建模高度与来源可在周边面板查看。</p><p>俯视阴影取所选楼层窗台标高，点色取各栋实际窗台的射线结果。三维模型按实际米制尺寸绘制，并随视角更新楼面遮挡与窗台可见性。周边楼按当前节气是否遮挡过住宅窗台着色。当一条射线遇到多个遮挡物时，面板显示最靠近窗台的一个。</p></details></div>
-</div><p class="hint">底图采用 2026 年 11 月 2 日一期方案公示。后续分期楼位按图示计入。点住宅或窗台可选择观察户，点周边建筑或设施可核对高度和资料来源。</p>
+<details class="method-block"><summary>计算口径</summary>
+<h3>时间与采样</h3><p>回放使用北京时间，从日出到日落。窗台卡片按每个 5 分钟区间的中点判断直射，日出日落和太阳中心过地平线附近的短区间单独计算。日出日落按太阳上缘计算，测光射线指向太阳中心。</p>
+<div id="clockComparison"></div>
+<h3>住宅层与窗台</h3><p>每个单元分东户、西户。每户南窗设两个代表点，A 偏东，B 偏西。窄楼按一个单元、宽楼按东单元和西单元建模。户界和窗位由总平图面宽推估，具体房间和窗位需用分户图核实。</p>
+<h3>楼桥遮挡</h3><p>“地块”和“含周边”只改变取景范围，均计入周边楼与立交桥的遮挡。俯视阴影投到所选窗台高度，各栋圆点的颜色取该栋对应窗台的射线结果。棕色表示建筑当天曾挡过光。每次只记录离窗台最近的遮挡物。</p><p>周边楼高、桥面和墩位含估值。太阳较低时，模型范围外的建筑也可能遮光。冬至 3 小时是本项目的选房筛查指标，临界户应核对窗位和相邻楼高。</p></details></div>
+</div><p class="hint">底图采用 2026 年 11 月 2 日一期公示总平图，后续分期楼位按图中示意建模。</p>
 </main>
 <script type="application/json" id="scene">
 __SUN_SCENE__
+</script>
+<script>
+function showStartupError(){
+ document.querySelector('main').classList.add('startup-failed');
+ document.getElementById('startupError').hidden=false;
+}
+window.addEventListener('error',showStartupError);
+document.getElementById('retryStartup').onclick=function(){location.reload()};
 </script>
 <script>
 __SUN_ORBIT_JS__
@@ -81,6 +101,7 @@ __SUN_ORBIT_JS__
 const sc=JSON.parse(document.getElementById('scene').textContent);
 const el=id=>document.getElementById(id);
 const c=el('map'),screen=c.getContext('2d');
+if(!screen)throw new Error('此浏览器无法创建 2D 画布');
 let g=screen;
 const homes=sc.buildings.filter(b=>b.is_target).sort((a,b)=>parseInt(a.id)-parseInt(b.id));
 const selected={day:'冬至',bid:homes[0].id,unit:'西户',floor:1,frame:0,minute:sc.days['冬至'].start,playing:!matchMedia('(prefers-reduced-motion: reduce)').matches,view:'iso',scope:document.querySelector('[data-scope][aria-pressed="true"]').dataset.scope,speed:1};
@@ -90,6 +111,12 @@ function addressOf(bid,unit){return allPts[pointByHome.get(bid).get(unit)[0]]}
 function addressesFor(bid){return [...pointByHome.get(bid).keys()].map(unit=>addressOf(bid,unit))}
 const byId=new Map(sc.buildings.map(b=>[b.id,b]));
 const dayList=['大寒','冬至','春分'];
+for(const name of dayList){
+ const day=sc.days[name];
+ if(!day?.frames?.length||!day.solar_path?.length||!Array.isArray(day.household_leaders?.rows)||!(day.end>day.start)){
+   throw new Error(name+'场景数据不完整');
+ }
+}
 let hitTests=[],sideView='home',exterior=null;
 let animationId=0,lastTick=null,lastPanelKey='',lastClockSecond=-1;
 const externals=sc.buildings.filter(b=>b.group==='external');
@@ -122,21 +149,32 @@ function showExterior(){
   el('external').value=b.id;el('extName').textContent=b.name;el('extId').textContent=b.id;
   const estimated=b.estimated??proof.estimated;
   const limits=Array.isArray(proof.range)?proof.range:b.roof_height_range;
-  const bridge=b.kind==='bridge',dimensions=[];
+  const bridge=b.kind==='bridge',dimensions=[],scenarios=[];
+  const approx=estimated?'约 ':'';
   if(bridge){
     const decks=bridgeDecks(b),piers=(b.parts||[]).filter(p=>p.kind==='pier');
-    el('extHeight').textContent='桥面顶标高 '+spanText(decks.map(d=>d.top))+' 米'+(estimated?'（估算）':'');
-    dimensions.push('桥面底标高 '+spanText(decks.map(d=>d.base))+' 米','桥面结构厚度 '+spanText(decks.map(d=>d.top-d.base))+' 米');
-    dimensions.push(piers.length?'模型含 '+piers.length+' 个桥墩':'模型仅含桥面');
+    const main=decks.filter(d=>d.deck_name?.includes('主桥'));
+    const ramps=decks.filter(d=>d.deck_name?.includes('匝道'));
+    if(Number.isFinite(b.ground)&&main.length&&ramps.length&&main.length+ramps.length===decks.length){
+      const above=(parts,key)=>spanText(parts.map(part=>part[key]-b.ground));
+      el('extHeight').textContent='主桥桥面离地'+approx+above(main,'top')+' 米，匝道'+approx+above(ramps,'top')+' 米';
+      dimensions.push('主桥梁底离地'+approx+above(main,'base')+' 米，匝道'+approx+above(ramps,'base')+' 米');
+    }else{
+      el('extHeight').textContent='各幅桥面顶标高'+approx+spanText(decks.map(d=>d.top))+' 米';
+      dimensions.push('梁底标高'+approx+spanText(decks.map(d=>d.base))+' 米');
+    }
+    dimensions.push(piers.length?'图中 '+piers.length+' 根桥墩'+(estimated?'为示意墩位':''):'模型仅含桥面');
   }else{
-    el('extHeight').textContent=(b.base===0?'算阴影采用的屋顶高度 ':'算阴影采用的顶面标高 ')+num(b.top)+' 米'+(estimated?'（估算）':'');
-    dimensions.push('模型基底 '+num(b.base)+' m');
-    if(b.floors>0)dimensions.push('地上 '+b.floors+' 层');
-    if(b.base===0 && Number.isFinite(proof.previous_roof_m) && Math.abs(proof.previous_roof_m-b.top)>.051)dimensions.push('复核前 '+num(proof.previous_roof_m)+' m');
+    el('extHeight').textContent=(b.base===0?'日照计算采用的楼高':'日照计算采用的顶面标高')+approx+num(b.top)+' 米';
+    if(b.base!==0)dimensions.push('基底标高 '+num(b.base)+' 米');
+    if(b.floors>0)dimensions.push('模型取 '+b.floors+' 层');
+    if(b.base===0 && Number.isFinite(proof.previous_roof_m) && Math.abs(proof.previous_roof_m-b.top)>.051)scenarios.push('上一版模型 '+num(proof.previous_roof_m)+' 米');
   }
   el('focusExt').textContent=bridge?'聚焦立交桥':'聚焦这栋建筑';
-  if(Array.isArray(limits))dimensions.push('高度取值区间 '+limits.map(num).join('–')+' m');
+  if(Array.isArray(limits))scenarios.push('模型高度试算范围 '+limits.map(num).join('–')+' 米');
   el('extSpan').textContent=dimensions.join(' · ');
+  el('extScenarios').textContent=scenarios.join(' · ');el('extScenarios').hidden=!scenarios.length;
+  el('extEvidence').querySelector('summary').textContent=bridge?'桥高、墩位与资料来源':'楼高依据与资料来源';
   el('extReview').textContent=[proof.status||'高度待核',proof.summary].filter(Boolean).join(' · ');
   const source=el('extSource');source.replaceChildren();
   const links=[...(proof.references||[]),{url:proof.url,title:proof.source_label}];
@@ -144,11 +182,10 @@ function showExterior(){
   let more=null;
   for(const ref of links){
     if(!ref?.url || !/^https?:\/\//i.test(ref.url)||seen.has(ref.url))continue;
-    if(seen.size===3 && !bridge)break;
     seen.add(ref.url);
     if(seen.size===4){
       more=document.createElement('details');const summary=document.createElement('summary');
-      summary.textContent='更多桥位资料';more.append(summary);source.append(more);
+      summary.textContent=bridge?'更多桥位资料':'更多楼高资料';more.append(summary);source.append(more);
     }
     const area=more||source;
     if(seen.size>1 && seen.size!==4)area.append(' · ');
@@ -161,9 +198,10 @@ function showExterior(){
     credit.textContent='© OpenStreetMap contributors';credit.target='_blank';credit.rel='noopener noreferrer';
     const creditLine=document.createElement('p');creditLine.append('桥位线数据 ',credit);source.append(creditLine);
   }
-  const n=impact(b),object=bridge?'这座桥':'此楼';
+  const n=impact(b),object=bridge?'这座桥':'这栋楼';
   el('extImpact').textContent=b.shadow_impact ?
-    (n?selected.day+'从日出到日落，各窗台被'+object+'遮挡的时长合计 '+n.toLocaleString('zh-CN')+' 点·分钟，只计沿射线最靠近窗台的遮挡物。':selected.day+'从日出到日落，'+object+'作为窗台最近遮挡物的合计为 0 点·分钟。'):'';
+    (n?selected.day+'，全小区南窗测点由'+object+'最先挡光的记录共 '+n.toLocaleString('zh-CN',{maximumFractionDigits:1})+' 点·分钟。':selected.day+'，全小区南窗测点均未将'+object+'记录为最近遮挡物。'):'';
+  el('impactHelp').hidden=!b.shadow_impact;
 }
 function spanText(values){
   const low=num(Math.min(...values)),high=num(Math.max(...values));
@@ -183,7 +221,7 @@ function formatTime(minute,seconds=false){
  const pad=n=>String(n).padStart(2,'0');
  return pad(Math.floor(total/3600))+':'+pad(Math.floor(total/60)%60)+(seconds?':'+pad(total%60):'');
 }
-const durationText=minutes=>Number(minutes.toFixed(1))+' 分';
+const durationText=minutes=>Number(minutes.toFixed(1))+' 分钟';
 function preceding(items,value,get){
  let lo=0,hi=items.length;
  while(lo<hi){const mid=(lo+hi)>>1;if(get(items[mid])<=value)lo=mid+1;else hi=mid}
@@ -213,14 +251,14 @@ function makeCards(){
  const ds=sc.days[selected.day],ids=pointByHome.get(selected.bid).get(selected.unit);
  el('probes').replaceChildren(...ids.map(ip=>{
    const entry=sample(ip,selected.floor),node=document.createElement('section');node.className='probe';node.dataset.ip=ip;
-   node.innerHTML='<div class="probe-title"><strong></strong><span class="status"></span></div><div class="blocker" hidden><span></span><button type="button" hidden></button></div><div class="duration"><span>已累计 <b class="sum"></b></span><span>全天 <b class="total"></b></span></div><div class="track"></div><div class="timescale"><span></span><span></span></div><p class="periods"></p>';
+   node.innerHTML='<div class="probe-title"><strong></strong><span class="status"></span></div><div class="blocker" hidden><span></span><button type="button" hidden></button></div><div class="duration"><span>已累计 <b class="sum"></b></span><span>全天直射 <b class="total"></b></span></div><div class="track"></div><div class="timescale"><span></span><span></span></div><p class="periods"></p>';
    const blockerButton=node.querySelector('.blocker button');
    blockerButton.onclick=()=>{if(blockerButton.dataset.id){exterior=blockerButton.dataset.id;inspect('ext');draw()}};
    const relative=ids.length===2?(allPts[ip].x>allPts[ids.find(j=>j!==ip)].x?' · 偏东':' · 偏西'):'';
    node.querySelector('strong').textContent=allPts[ip].label+' 点'+relative;node.querySelector('.total').textContent=durationText(entry.count);
    const tr=node.querySelector('.track');entry.runs.forEach(([a,b])=>{let s=document.createElement('span');s.className='lit';s.style.left=(a-ds.start)*100/(ds.end-ds.start)+'%';s.style.width=(b-a)*100/(ds.end-ds.start)+'%';tr.append(s)});let cursor=document.createElement('i');cursor.className='cursor';tr.append(cursor);
    const ticks=node.querySelector('.timescale').children;ticks[0].textContent=formatTime(ds.start);ticks[1].textContent=formatTime(ds.end);
-   node.querySelector('.periods').textContent=entry.runs.length?'见光 '+entry.runs.map(r=>r.map(t=>formatTime(t)).join('–')).join(' / '):'本时段无直射';
+   node.querySelector('.periods').textContent=entry.runs.length?'见光 '+entry.runs.map(r=>r.map(t=>formatTime(t)).join('–')).join(' / '):'全天未见直射';
    return node;
  }));
 }
@@ -231,60 +269,22 @@ function rankDuration(seconds){
  const minutes=Math.round(seconds/60),hours=Math.floor(minutes/60);
  return (hours?hours+' 小时 ':'')+(minutes%60)+' 分';
 }
-function floorText(floors){
- const ranges=[];
- for(const floor of [...new Set(floors)].sort((a,b)=>a-b)){
-   const tail=ranges.at(-1);
-   if(tail&&floor===tail[1]+1)tail[1]=floor;
-   else ranges.push([floor,floor]);
- }
- return ranges.map(([a,b])=>a===b?String(a):a+'–'+b).join('、')+'层';
-}
-function describeHomes(rows){
- const buildings=new Map();
- for(const {bid,unit,floor} of rows){
-   if(!buildings.has(bid))buildings.set(bid,new Map());
-   const units=buildings.get(bid);
-   if(!units.has(unit))units.set(unit,[]);
-   units.get(unit).push(floor);
- }
- const descriptions=[];
- for(const [bid,units] of buildings){
-   const byFloor=new Map();
-   for(const [unit,floors] of units){
-     const label=floorText(floors);
-     if(!byFloor.has(label))byFloor.set(label,[]);
-     byFloor.get(label).push(unit);
-   }
-   const levels=[];
-   for(const [level,names] of byFloor){
-     const doorsByEntry=new Map();
-     for(const name of names){
-       const {entry,door}=addressOf(bid,name);
-       if(!doorsByEntry.has(entry))doorsByEntry.set(entry,[]);
-       doorsByEntry.get(entry).push(door);
-     }
-     const addresses=[...doorsByEntry].map(([entry,doors])=>(entry?entry+'的':'')+doors.join('、'));
-     levels.push(level+' '+addresses.join('及'));
-   }
-   descriptions.push(bid+' '+levels.join('，'));
- }
- return descriptions.join('，');
-}
 function renderRanks(){
  const day=selected.day,{households,rows,excluded_buildings=[]}=sc.days[day].household_leaders;
  const leaders=leadersByDay.get(day);
  const firstPhase=leaders.filter(r=>byId.get(r.bid).phase==='一期申报');
- const scope=excluded_buildings.length?'排除'+excluded_buildings.join('、')+'整栋后，':'';
- const result=leaders.length?'，'+leaders.length+' 户'+(leaders.length>1?'并列':'排名')+'第一，平均日照约 '+rankDuration(leaders[0].mean_seconds)+'。':'。';
- el('rankSummary').textContent=day+'，'+scope+'共 '+households+' 户参评'+result;
- el('rankHomes').textContent=firstPhase.length?'其中 '+firstPhase.length+' 户在一期申报楼栋，分别是 '+describeHomes(firstPhase)+'。':leaders.length?'日照最长的住户为 '+describeHomes(leaders)+'。':'';
+ const sampling=sc.days[day].household_leaders.sample_minutes||sc.step;
+ const scope=excluded_buildings.length?'（'+excluded_buildings.join('、')+'整栋不参评）':'';
+ const result=leaders.length?leaders.length+' 户'+(leaders.length>1?'并列':'排名')+'第一，每户南窗测点的平均直射时长约 '+rankDuration(leaders[0].mean_seconds)+'。':'暂无上榜住户。';
+ el('rankSummary').textContent=day+'共 '+households+' 户参评'+scope+'。'+result;
+ el('rankHomes').textContent=firstPhase.length===0?'':firstPhase.length===leaders.length?'这 '+leaders.length+' 户均在一期申报楼栋。':'其中 '+firstPhase.length+' 户在一期申报楼栋。';
+ el('rankMethod').textContent='榜单从日出算到日落，按 '+sampling+' 分钟'+(sampling===sc.step?'采样。':'复算。窗台卡片按 '+sc.step+' 分钟采样。')+'点选住户可在三维图中查看。';
  const toggle=el('highlightFirst'),legend=el('leaderLegend');
  toggle.disabled=!leaders.length;
  toggle.setAttribute('aria-pressed',String(highlightLeaders));
  toggle.querySelector('span').textContent=highlightLeaders?'取消高亮':'高亮第一名';
  legend.hidden=!highlightLeaders||!leaders.length;
- legend.querySelector('span').textContent='参评第一名 · '+leaders.length+' 户';
+ legend.querySelector('span').textContent=(leaders.length>1?'日照并列第一':'日照第一')+' · '+leaders.length+' 户';
  legend.setAttribute('aria-label','取消'+day+'参评第一名 '+leaders.length+' 户的高亮');
 
  // Show a representative from each building at the same rank before repeating
@@ -310,14 +310,18 @@ function renderRanks(){
    Object.assign(button.dataset,{bid:row.bid,floor:row.floor,unit:row.unit,entry,door});
    button.innerHTML='<span class="rank-number"></span><span><strong class="rank-address"></strong><small class="rank-phase"></small></span><span><strong class="rank-duration"></strong><small class="rank-probes"></small></span>';
    button.querySelector('.rank-number').textContent=(rankCounts.get(row.rank)>1?'并列第':'第')+row.rank;
-   button.querySelector('.rank-address').textContent=[row.bid,row.floor+'层',entry,door].filter(Boolean).join(' · ');
+   const address=button.querySelector('.rank-address');
+   for(const part of [row.bid,row.floor+'层',entry,door].filter(Boolean)){
+     if(address.childNodes.length)address.append(' · ');
+     const word=document.createElement('span');word.className='address-part';word.textContent=part;address.append(word);
+   }
    button.querySelector('.rank-phase').textContent=byId.get(row.bid).phase;
    button.querySelector('.rank-duration').textContent='约 '+rankDuration(row.mean_seconds);
    button.querySelector('.rank-probes').textContent=Object.entries(row.probe_seconds).map(([label,s])=>label+' '+durationText(s/60)).join(' · ');
    item.append(button);return item;
  }));
  const more=el('rankMore');
- more.hidden=rows.length<=5;more.textContent=rankExpanded?'收起列表':'展开全部 '+rows.length+' 户';
+ more.hidden=rows.length<=5;more.textContent=rankExpanded?'收起榜单':rows.length===leaders.length?'查看全部 '+rows.length+' 户并列第一':'展开榜单（'+rows.length+' 户）';
  more.setAttribute('aria-expanded',String(rankExpanded));
  markRankSelection();
 }
@@ -334,7 +338,7 @@ function toggleLeaderHighlight(){
  if(!highlightLeaders){draw();return}
  selected.view='iso';selected.scope='site';
  toggleGroup('[data-view]','view','iso');toggleGroup('[data-scope]','scope','site');resetView();
- document.querySelector('.map-head').scrollIntoView({block:'start'});c.focus({preventScroll:true});
+ scrollToMap();
 }
 el('highlightFirst').onclick=toggleLeaderHighlight;
 el('leaderLegend').onclick=()=>{toggleLeaderHighlight();c.focus({preventScroll:true})};
@@ -343,8 +347,21 @@ el('rankList').onclick=e=>{
  const {bid,floor,unit}=button.dataset;
  inspect('home');Object.assign(selected,{bid,floor:Number(floor),unit});
  initSelection();focusBuilding(byId.get(bid));
- document.querySelector('.map-head').scrollIntoView({block:'start'});c.focus({preventScroll:true});
-};
+ };
+function updateClockComparison(){
+ const section=el('clockComparison');
+ const home=sc.home_screening?.[selected.bid]?.[selected.unit]?.[selected.floor];
+ section.replaceChildren();
+ if(!home || !Number.isFinite(home.apparent))return;
+ const address=addressOf(selected.bid,selected.unit);
+ const heading=document.createElement('h3');
+ heading.textContent=selected.bid+' '+selected.floor+'层 '+address.entry+address.door+' · 时段对照';
+ const clock=document.createElement('p'),range=document.createElement('p');
+ const bounds=sc.days['大寒'].apparent_window_civil;
+ clock.textContent='大寒 08:00–16:00，按北京时间，户内较弱测点直射 '+home.civil+' 分钟。按当地真太阳时，同一时间带对应北京时间 '+bounds.join('–')+'，直射 '+home.apparent+' 分钟。';
+ range.textContent='周边楼高从估计低值调到高值时，较弱测点的大寒直射从 '+home.cold_low+' 变为 '+home.cold_high+' 分钟，冬至从 '+home.winter_low+' 变为 '+home.winter_high+' 分钟。此处采用北京时间分析窗口，大寒 08:00–16:00，冬至 09:00–15:00。桥高和窗位仍按当前估值。';
+ section.append(heading,clock,range);
+}
 function initSelection(){
  const b=byId.get(selected.bid);
  const addresses=addressesFor(b.id),active=addresses.find(a=>a.unit===selected.unit)||addresses[0];
@@ -367,6 +384,7 @@ function initSelection(){
    label.textContent=(first?'日出 ':last?'日落 ':'')+formatTime(t);
    label.title=formatTime(t,true)+' 北京时间';return label;
  }));
+ updateClockComparison();
  el('subtitle').textContent='天津河西 · '+ds.date+' · '+selected.day+' · 南向窗台直射';
  if(rankingDay!==selected.day){rankingDay=selected.day;rankExpanded=false;renderRanks()}
  else markRankSelection();
@@ -407,21 +425,24 @@ function shadowGeometry(z,P,w,h){
    const ring=poly.map(([x,y])=>P(x,y,z));
    if(twiceArea(ring)<0)ring.reverse();
    const reach=diagonal+Math.max(...ring.map(([x,y])=>Math.hypot(x-center[0],y-center[1])))+2;
-   faces.push({ring,reach,lo:Math.max(lo-z,0),hi:hi-z});
+   faces.push({ring,reach,lo:Math.max(lo-z,0),hi:hi-z,extent:bounds(ring)});
  }
  const origin=P(0,0,z),x=P(1,0,z),y=P(0,1,z);
- return {faces,xx:x[0]-origin[0],xy:x[1]-origin[1],yx:y[0]-origin[0],yy:y[1]-origin[1]};
+ return {faces,w,h,xx:x[0]-origin[0],xy:x[1]-origin[1],yx:y[0]-origin[0],yy:y[1]-origin[1]};
 }
 function shadowPath(model,dir){
  const path=new Path2D();
  if(dir[2]<=0)return path;
  const dx=-(model.xx*dir[0]+model.yx*dir[1])/dir[2],dy=-(model.xy*dir[0]+model.yy*dir[1])/dir[2];
  const shift=Math.hypot(dx,dy);
- for(const {ring,reach,lo,hi} of model.faces){
+ for(const {ring,reach,lo,hi,extent} of model.faces){
    if(lo*shift>reach)continue;
    // Beyond reach both cap and outgoing edge are off screen, even at sunrise.
    const high=shift?Math.min(hi,reach/shift):hi;
    const bx=dx*lo,by=dy*lo,tx=dx*high,ty=dy*high;
+   // Cull the swept shadow, including shadows cast into the view by off-screen solids.
+   if(extent[2]+Math.max(bx,tx)<-1 || extent[0]+Math.min(bx,tx)>model.w+1 ||
+      extent[3]+Math.max(by,ty)<-1 || extent[1]+Math.min(by,ty)>model.h+1)continue;
    path.moveTo(ring[0][0]+bx,ring[0][1]+by);
    for(let k=1;k<ring.length;k++)path.lineTo(ring[k][0]+bx,ring[k][1]+by);
    path.closePath();
@@ -439,7 +460,7 @@ function shadowPath(model,dir){
 // The browser composites these stationary surfaces. Copying all full-size layers
 // onto one viewport 60 times a second stalls software compositors on Retina displays.
 const layers=new Map();
-const layerOrder={ground:0,annotations:4,winners:5};
+const layerOrder={ground:0,annotations:4,probes:4,winners:5};
 function cachedLayer(id,key,paintLayer){
  let slot=layers.get(id);
  if(!slot){
@@ -594,7 +615,7 @@ function draw(sky){
  }
  if(orbit.layer.hidden!==!iso)orbit.layer.hidden=!iso;
  if(iso)orbit.draw(null,f,selected,sideView==='ext'?exterior:null,b=>impact(b)>0);
- const overlayKey=selectionKey+'|'+selected.frame+'|'+(iso?orbit.pixelRatio:0);
+ const overlayKey=selectionKey+'|'+(iso?orbit.pixelRatio:0);
  cachedLayer('annotations',overlayKey,()=>{
    if(!iso){
    planHits=[];
@@ -620,7 +641,9 @@ function draw(sky){
  line([18,h-13],[18,h-17],'#37555d',1.3);line([18+bar,h-13],[18+bar,h-17],'#37555d',1.3);textAt(Number(meters.toPrecision(3))+' m',18,h-24,9,'#37555d','left');
  const origin=P(0,0),np=P(0,1),na=Math.atan2(np[1]-origin[1],np[0]-origin[0])*180/Math.PI+90;
  el('north').setAttribute('transform','rotate('+na+' 8 13)');
- el('planeNote').textContent=iso?'三维楼群 · 米制等比例':'窗台高度水平面投影 · '+num(ref)+' m';
+ el('planeNote').textContent=iso?'':'阴影投到所选窗台高度（'+num(ref)+' 米）';
+ });
+ cachedLayer('probes',overlayKey+'|'+selected.frame,()=>{
    markerHits=[];homes.forEach(pointsFor);hitTests=iso?markerHits:[...planHits,...markerHits];
  });
  if(iso&&winners){
@@ -646,30 +669,41 @@ function draw(sky){
 }
 function updateBlocker(entry,day,ip,on){
  const box=entry.querySelector('.blocker'),events=day.blockers?.[ip]?.[selected.floor-1];
- // Each entry takes effect at its first frame and lasts until the next one.
- box.hidden=on || !events?.length;if(box.hidden)return;
- let lo=0,hi=events.length;
- while(lo<hi){const mid=(lo+hi)>>1;if(events[mid][0]<=selected.frame)lo=mid+1;else hi=mid}
- const id=lo?events[lo-1][1]:-1,b=sc.buildings[id];
+ const index=events?.length?preceding(events,selected.frame,event=>event[0]):-1;
+ const owner=index>=0?events[index][1]:null;
+ const b=owner>=0&&owner!==null?sc.buildings[owner]:null;
+ const status=entry.querySelector('.status');
+ status.textContent=on?'有直射':b?'被遮挡':'无直射';status.className='status '+(on?'on':'off');
+ box.hidden=on;if(on)return;
  const description=box.querySelector('span'),link=box.querySelector('button');
  link.hidden=b?.group!=='external';
- if(!link.hidden) {
+ if(!link.hidden){
    description.textContent='最近遮挡';link.dataset.id=b.id;
    link.textContent=b.kind==='bridge'?b.name:b.id+' · '+b.name;link.title='查看遮挡物的高度与来源';
  }else if(b){
    description.textContent='最近遮挡　'+b.id+(b.id===selected.bid?'（本楼）':'');
- }else if(id===-2){description.textContent='窗面背阳或太阳低于地平线'}
- else{box.hidden=true}
+ }else if(owner===-2){
+   const frame=day.frames[selected.frame];
+   description.textContent=frame.direction[2]<=0
+     ?(frame.start<(day.start+day.end)/2?'太阳中心尚未升起':'太阳中心已落下')
+     :'太阳在窗面背后';
+ }else{box.hidden=true}
 }
+let lastPanelUpdate=-Infinity,mapInView=true;
 function redraw(){
  const day=sc.days[selected.day];
  selected.frame=preceding(day.frames,selected.minute,f=>f.start);
  const frame=day.frames[selected.frame],sky=currentSky(day);
- draw(sky);
+ if(mapInView)draw(sky);
  const key=[selected.day,selected.frame,selected.bid,selected.unit,selected.floor].join('|');
  const binChanged=key!==lastPanelKey;
+ const now=performance.now();
+ // Keep camera and sun motion on rAF. Clock text and accessibility values can update less often.
+ if(selected.playing && !binChanged && now-lastPanelUpdate<65)return;
+ lastPanelUpdate=now;
  if(binChanged){
-   el('sampleTime').textContent='窗台采样区间 '+formatTime(frame.start,true)+'–'+formatTime(frame.end,true);
+   el('sampleTime').textContent='本段判光 '+formatTime(frame.start)+'–'+formatTime(frame.end);
+   el('sampleTime').title=formatTime(frame.start,true)+'–'+formatTime(frame.end,true)+' 北京时间';
    lastPanelKey=key;
  }
  const second=Math.round(selected.minute*60);
@@ -684,7 +718,6 @@ function redraw(){
  for(const entry of el('probes').children){
    const ip=Number(entry.dataset.ip),on=lit(frame.masks[ip],selected.floor);
    if(binChanged){
-     const status=entry.querySelector('.status');status.textContent=on?'见光':'受遮';status.className='status '+(on?'on':'off');
      updateBlocker(entry,day,ip,on);
    }
    const total=sample(ip,selected.floor).prefix[selected.frame]+(on?selected.minute-frame.start:0);
@@ -747,9 +780,17 @@ el('entry').onchange=e=>{
  selected.unit=(doors.find(a=>a.door===previous)||doors[0]).unit;initSelection();
 };
 el('unit').onchange=e=>{selected.unit=e.target.value;initSelection()};
+const touchPointer=matchMedia('(pointer: coarse)');
+function updateMapHelp(){
+ const iso=selected.view==='iso';
+ el('mapHint').textContent=touchPointer.matches
+   ?(iso?'单指旋转 · 双指缩放或平移':'单指平移 · 双指缩放或平移')
+   :(iso?'拖动旋转 · 滚轮缩放 · 右键或 Shift 拖动平移':'拖动平移 · 滚轮缩放');
+ c.setAttribute('aria-label',(iso?'三维楼群，方向键旋转，Shift 加方向键平移':'俯视图，方向键平移')+'，加减号缩放，Home 复位');
+}
 function resetView(){
  orbit.reset(selected.scope);Object.assign(planCam,{x:0,y:0,zoom:1});
- el('mapHint').textContent=selected.view==='iso'?'拖动旋转 · 滚轮缩放 · 右键或 Shift 拖动平移 · 触屏双指缩放和平移':'拖动平移 · 滚轮或双指缩放';
+ updateMapHelp();
  draw();
 }
 function changeZoom(factor,anchor){
@@ -768,10 +809,13 @@ for(const key of ['view','scope'])document.querySelectorAll('[data-'+key+']').fo
 el('resetCam').onclick=resetView;el('zoomIn').onclick=()=>zoomBy(1.35);el('zoomOut').onclick=()=>zoomBy(1/1.35);
 el('homesTab').onclick=()=>{inspect('home');draw()};el('externalsTab').onclick=()=>{inspect('ext');draw()};
 el('external').onchange=e=>{exterior=e.target.value;inspect('ext');draw()};
+function scrollToMap(){
+ document.querySelector('.map-head').scrollIntoView({block:'start'});c.focus({preventScroll:true});
+}
 function focusBuilding(b){
  if(!b)return;
  if(selected.view!=='iso'){selected.view='iso';toggleGroup('[data-view]','view','iso');resetView()}
- orbit.focus(b);draw();
+ orbit.focus(b);draw();scrollToMap();
 }
 el('focusHome').onclick=()=>focusBuilding(byId.get(selected.bid));el('focusExt').onclick=()=>focusBuilding(byId.get(exterior));
 function hitAt(x,y){
@@ -841,6 +885,7 @@ c.onlostpointercapture=e=>finishPointer(e,true);c.onpointerleave=()=>{el('hover'
 c.addEventListener('wheel',e=>{e.preventDefault();const mult=e.deltaMode===1?16:e.deltaMode===2?c.clientHeight:1;zoomBy(Math.exp(Math.max(-1,Math.min(1,-e.deltaY*mult*.0015))),local(e))},{passive:false});
 c.onkeydown=e=>{
  const d={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];
+ if(e.key==='Escape'&&highlightLeaders){toggleLeaderHighlight();e.preventDefault();return}
  if(d){if(selected.view==='iso'&&!e.shiftKey)orbit.orbit(...d);else panBy(...d);draw()}
  else if(['+','='].includes(e.key))zoomBy(1.25);else if(e.key==='-')zoomBy(.8);else if(e.key==='Home')resetView();else return;
  e.preventDefault();
@@ -857,7 +902,16 @@ if(bridges.length){
     focusBuilding(bridges[0]);
   };
 }
-el('mapHint').textContent='拖动旋转 · 滚轮缩放 · 右键或 Shift 拖动平移 · 触屏双指缩放和平移';
-new ResizeObserver(requestDraw).observe(c);document.addEventListener('visibilitychange',restartClock);
+updateMapHelp();touchPointer.addEventListener('change',updateMapHelp);
+new ResizeObserver(requestDraw).observe(c);
+if('IntersectionObserver' in window){
+ const visibility=new IntersectionObserver(([entry])=>{
+   mapInView=entry.isIntersecting;
+   if(mapInView)requestDraw();
+ },{rootMargin:'64px'});
+ visibility.observe(c);
+}
+document.addEventListener('visibilitychange',restartClock);
 initSelection();refreshPlayback();restartClock();
+window.removeEventListener('error',showStartupError);
 </script></body></html>

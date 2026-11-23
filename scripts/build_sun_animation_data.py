@@ -9,13 +9,18 @@ from pathlib import Path
 import numpy as np
 
 from simulate_sunlight import ZONE
-from sun_engine import Mesh, lit_intervals, solar_position
+from sun_engine import Mesh, apparent_to_civil, lit_intervals, solar_position
 from sun_model import DAYS, MODEL, OUTPUT, household_addresses, model_digest, prisms, read_model, receivers, solid_parts, targets
 
 
 def _scene_building(building):
     ground = building["ground_elevation"]
     main, *parts = solid_parts(building)
+    if building.get("kind") == "bridge":
+        main.update(ground=ground, deck_name=building.get("name", ""))
+        for part, source in zip(parts, building.get("parts", [])):
+            if part.get("kind") == "deck":
+                part["deck_name"] = source.get("name", "")
     return {
         "id": building["id"],
         "name": building.get("chart_name", building["id"]),
@@ -127,6 +132,37 @@ def _household_leaders(keys, lit_seconds, limit=5, *, excluded_buildings=()):
     return {"households": len(groups), "rows": rows, "excluded_buildings": list(excluded_buildings)}
 
 
+def fine_daylight_seconds(mesh, xyz, normals, bins, latitude, longitude):
+    """Split the civil minute grid at the exact sunrise and horizon crossings."""
+    edges = {t for a, b, _ in bins for t in (a, b)}
+    first, last = min(edges), max(edges)
+    t = first.replace(second=0, microsecond=0) + timedelta(minutes=1)
+    while t < last:
+        edges.add(t)
+        t += timedelta(minutes=1)
+    ordered = sorted(edges)
+    total = np.zeros(len(xyz), dtype=np.int64)
+    for a, b in zip(ordered, ordered[1:]):
+        sun = solar_position(a + (b-a)/2, latitude, longitude)
+        total += (mesh.classify(xyz, normals, sun.direction) == -1) * int((b-a).total_seconds())
+    return total
+
+
+def home_screening(records, keys):
+    """Keep both clock conventions and the height range with the dwelling they describe."""
+    result = {}
+    columns = {"civil": "大寒分钟", "apparent": "大寒真太阳时分钟",
+               "winter": "冬至分钟", "winter_high": "冬至保守分钟", "winter_low": "冬至乐观分钟",
+               "cold_high": "大寒保守分钟", "cold_low": "大寒乐观分钟"}
+    for (bid, floor, unit, _), row in zip(keys, records, strict=True):
+        values = result.setdefault(bid, {}).setdefault(unit, {}).setdefault(floor, {})
+        for name, column in columns.items():
+            if row.get(column, "") != "":
+                value = int(row[column])
+                values[name] = min(values.get(name, value), value)
+    return result
+
+
 def build_scene(model, year, details_path):
     """Return JSON-ready animation data; check every exported point's runs against the CSV.
 
@@ -220,10 +256,18 @@ def build_scene(model, year, details_path):
         blockers = [[None] * by_id[p["bid"]]["floors"] for p in points]
         for station, (_, floor, _, _), runs in zip(row_station, keys, history):
             blockers[station][floor - 1] = runs
+        coarse = _household_leaders(keys, lit_seconds, excluded_buildings=excluded)
+        fine = fine_daylight_seconds(mesh, xyz, normals, bins, latitude, longitude)
+        ranked = _household_leaders(keys, fine, excluded_buildings=excluded)
+        ranked.update(sample_minutes=1, coarse_first_count=sum(row["rank"] == 1 for row in coarse["rows"]))
         day_data[day] = {"date": midnight.date().isoformat(), "start": frames[0]["start"],
                          "end": frames[-1]["end"], "standard_start": 60*begin, "standard_end": 60*end,
                          "solar_path": solar_path, "frames": frames, "blockers": blockers,
-                         "household_leaders": _household_leaders(keys, lit_seconds, excluded_buildings=excluded)}
+                         "household_leaders": ranked}
+        if day == "大寒":
+            day_data[day]["apparent_window_civil"] = [
+                apparent_to_civil(t, latitude, longitude).strftime("%H:%M:%S")
+                for t in (standard_start, standard_end)]
         for bid, seconds, standard_value in zip(mesh.ids, first_hit_seconds, standard_seconds):
             by_id[bid].setdefault("shadow_impact", {})[day] = round(int(seconds) / 60, 3)
             by_id[bid].setdefault("standard_shadow_impact", {})[day] = int(standard_value // 60)
@@ -231,7 +275,7 @@ def build_scene(model, year, details_path):
         "year": year, "step": 5, "model_digest": digest,
         "site_polygon": model["site_polygon"],
         "buildings": buildings,
-        "points": points, "days": day_data,
+        "points": points, "days": day_data, "home_screening": home_screening(records, keys),
     }
 
 

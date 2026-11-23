@@ -1,5 +1,5 @@
 import unittest
-from build_sun_animation_data import _household_leaders
+from build_sun_animation_data import _household_leaders, home_screening
 from sun_households import _combined_intervals, summarize_households
 from sun_model import facade_probes, household_addresses, model_digest
 
@@ -15,6 +15,30 @@ def example_row(label, intervals, minutes, unit="东户"):
 
 
 class HouseholdTimes(unittest.TestCase):
+    def test_screening_uses_the_weakest_probe_for_each_home_and_scenario(self):
+        fields = ["大寒分钟", "大寒真太阳时分钟", "冬至分钟", "冬至保守分钟",
+                  "冬至乐观分钟", "大寒保守分钟", "大寒乐观分钟"]
+        values = [[110, 135, 180, 120, 220, 90, 140],
+                  [115, 125, 200, 140, 205, 95, 130],
+                  [120, 140, 165, 150, 210, 85, 145],
+                  [240, 245, 310, 260, 315, 225, 250]]
+        records = [dict(zip(fields, map(str, row))) for row in values]
+        keys = [("楼", 1, "西户", label) for label in "ABC"] + [("楼", 2, "西户", "A")]
+        result = home_screening(records, keys)["楼"]["西户"]
+        self.assertEqual(result[1], {"civil":110, "apparent":125, "winter":165,
+                                     "winter_high":120, "winter_low":205,
+                                     "cold_high":85, "cold_low":130})
+        self.assertEqual(result[2]["apparent"], 245)
+
+    def test_legacy_screening_preserves_available_data_without_inventing_apparent_minutes(self):
+        rows = [example_row("A", "08:00–10:00", 120), example_row("B", "09:00–10:00", 60)]
+        keys = [(r["楼号"], r["住宅楼层"], r["户位"], r["测点"]) for r in rows]
+        self.assertEqual(home_screening(rows, keys)["示例"]["东户"][1], {"civil":60, "winter":60})
+        self.assertNotIn("大寒真太阳时较弱点分钟", summarize_households(rows)[0])
+        for row, minutes in zip(rows, (55, 95)):
+            row["大寒真太阳时分钟"] = str(minutes)
+        self.assertEqual(summarize_households(rows)[0]["大寒真太阳时较弱点分钟"], 55)
+
     def test_whole_buildings_are_removed_before_assigning_ranks(self):
         keys = [(bid, floor, "东户", "A") for bid, floor in
                 [("12号楼", 1), ("13号楼", 18), ("9号楼", 11), ("10号楼", 1)]]

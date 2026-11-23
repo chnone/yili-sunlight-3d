@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
-from build_sun_animation_data import _daylight_bins, _scene_building
+from build_sun_animation_data import _daylight_bins, _scene_building, fine_daylight_seconds
 from simulate_sunlight import scenario_mesh
-from sun_engine import Mesh, lit_intervals, prism_triangles, solar_position, time_bins
+from sun_engine import Mesh, apparent_to_civil, lit_intervals, prism_triangles, solar_position, time_bins
 from sun_model import DAYS, prisms
 
 
@@ -39,6 +39,22 @@ def reference_errors():
 
 
 class SunTests(unittest.TestCase):
+    def test_apparent_window_converts_to_matching_tianjin_civil_instants(self):
+        for hour, minute, second in [(8, 21, 59), (16, 22, 5)]:
+            apparent = datetime(2026, 1, 20, hour, tzinfo=BEIJING)
+            civil = apparent_to_civil(apparent, 39.10, 117.22)
+            expected = apparent.replace(minute=minute, second=second)
+            self.assertLess(abs((civil - expected).total_seconds()), 1)
+        noon = datetime(2026, 1, 20, 12, tzinfo=BEIJING)
+        for zone in (BEIJING, timezone.utc):
+            # The same local apparent noon refers to one physical instant
+            # regardless of which civil offset is used to express the result.
+            civil = apparent_to_civil(noon.replace(tzinfo=zone), 39.10, 117.22)
+            sun = solar_position(civil, 39.10, 117.22)
+            self.assertAlmostEqual(sun.azimuth, 180, places=5)
+        with self.assertRaises(ValueError):
+            apparent_to_civil(noon.replace(tzinfo=None), 39.10, 117.22)
+
     def test_daylight_edges_and_standard_sampling_grid(self):
         for label, (month, day, begin, end) in DAYS.items():
             with self.subTest(label):
@@ -88,6 +104,20 @@ def box(xmin, ymin, xmax, ymax):
 
 
 class RayTests(unittest.TestCase):
+    def test_minute_ranking_resolves_shadow_transition_inside_coarse_bin(self):
+        start = datetime(2026, 1, 20, 12, 20, 20, tzinfo=BEIJING)
+        stop = start + timedelta(seconds=290)
+        bins = [(start, stop, start + (stop - start) / 2)]
+        origins = np.array([[0, 0, 1], [-5, 0, 1]])
+        normals = np.array([[0, -1], [0, -1]])
+        # The wall east of the first probe blocks it until apparent noon
+        # (12:22 civil); the second probe stays west of the entire wall.
+        for west_edge, expected in [(0, [190, 290]), (-1, [0, 290])]:
+            with self.subTest(west_edge=west_edge):
+                mesh = Mesh.from_prisms([("wall", box(west_edge, -3, 10, -2), 0, 20)])
+                seconds = fine_daylight_seconds(mesh, origins, normals, bins, 39.10, 117.22)
+                np.testing.assert_array_equal(seconds, expected)
+
     def test_bridge_decks_pier_and_open_clearance(self):
         bridge = {
             "id": "桥", "is_target": False, "group": "external", "kind": "bridge",
