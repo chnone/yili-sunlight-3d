@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>一里南侧地块 · 三维日照回放</title>
+<style>
+:root{color-scheme:light;--ink:#193542;--dim:#4a646c;--line:#d2dcd9;--page:#f4f5f1;--card:#fff;--sky:#e8eeed;--sun:#ffc35d;--amber:#905816;--shade:#576b75;--blue:#214e61;--tint:#eef3f2;font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;color:var(--ink);background:var(--page)}
+*{box-sizing:border-box}body{margin:0}button,select,input{font:inherit}button,select{color:var(--ink)}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #cd8527;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}.wrap{max-width:1512px;margin:auto;padding:clamp(14px,2.6vw,42px)}
+header{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 0 20px}h1,h2,p{margin:0}h1{font-size:clamp(26px,2.7vw,40px);line-height:1.25;font-weight:650;letter-spacing:-.06em}header p{font-size:13px;color:var(--dim);margin-top:8px}.tabs,.switch{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--line);background:#f1f4f0;border-radius:7px}.tabs button,.switch button{font-size:13px;font-weight:570;background:transparent;border:0;border-radius:4px;min-height:32px;padding:4px 13px;white-space:nowrap}.tabs button[aria-pressed=true],.switch button[aria-pressed=true]{color:white;background:var(--blue)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,306px);gap:16px;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}.map-head{padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px}.mode{display:flex;gap:7px}.map-head h2,.side h2{font-size:16px;letter-spacing:.02em}.map-head .switch button{min-height:27px;padding:2px 8px;font-size:12px}.mapbox{position:relative;isolation:isolate;background:#edf1ef;border-block:1px solid #dce3df}.mapbox canvas{width:100%;height:auto;aspect-ratio:1.88;display:block;touch-action:pan-y;cursor:pointer}.compass{position:absolute;right:12px;top:11px;pointer-events:none;background:#fffefcef;border:1px solid #c5d0ca;border-radius:6px;padding:4px 8px;font-size:11px;color:#365460;display:flex;align-items:center;gap:5px}.compass svg{width:15px;height:24px;overflow:visible}.mapinfo{padding:9px 16px;display:flex;align-items:center;gap:8px 15px;flex-wrap:wrap;color:var(--dim);font-size:11px}.legend{display:inline-flex;align-items:center;gap:5px}.dot{width:10px;height:10px;border-radius:100%;border:1px solid #543d20;background:#ffbd4f}.dot.dark{border-color:#f1f4f3;background:#394e5d;box-shadow:0 0 0 1px #a6b5b7}.shadow-swatch{background:#aabbba;width:13px;height:7px;border-radius:2px}.mapnote{margin-left:auto}.transport{border-top:1px solid var(--line);padding:14px 17px 12px}.playline{display:flex;align-items:center;gap:12px}.play{padding:6px 14px;border:0;background:var(--blue);color:white;border-radius:5px;font-weight:600;min-width:80px;min-height:36px}.play .icon{display:inline-block;min-width:18px;text-align:left}.time{font-family:"SFMono-Regular","Menlo","Consolas",monospace;font-variant-numeric:tabular-nums;font-size:clamp(18px,2.1vw,29px);letter-spacing:-.055em;white-space:nowrap}.zone{color:var(--dim);font-size:11px}.speed{margin-left:auto;min-height:32px;padding:0 4px;border:1px solid var(--line);border-radius:4px;background:#fff}.slider{margin:11px 0 1px;width:100%;accent-color:var(--blue);cursor:pointer}.ticks,.timescale{display:flex;justify-content:space-between;color:var(--dim);font:11px/1.4 ui-monospace,monospace}.skyinfo{border-top:1px solid var(--line);padding:10px 17px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.skyinfo b{color:var(--ink)}
+.side{padding:18px 16px}.fieldrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:16px 0 8px}.side label{display:block;color:var(--dim);font-size:12px}.side select{display:block;width:100%;padding:6px 5px;margin:4px 0 0;background:white;border:1px solid #b5c5c4;border-radius:4px;min-height:36px;font-size:14px}.side label.wide{margin-bottom:16px}.probes-head{border-top:1px solid var(--line);padding-top:14px;display:flex;align-items:center;justify-content:space-between;gap:8px}.probes-head h2{font-size:15px}.probes-head small{color:var(--dim);font-size:10px;text-align:right}.probe{padding:12px 0;border-bottom:1px solid var(--line)}.probe-title,.duration{display:flex;align-items:center;justify-content:space-between;gap:8px}.probe-title strong{font-size:15px}.status{font-size:11px;font-weight:600;padding:3px 7px;border-radius:3px}.on{background:#fff0ce;color:#7c4c12}.off{background:#e8edee;color:#435a66}.duration{font-size:12px;color:var(--dim);margin:9px 0 5px}.duration b{font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}.track{position:relative;height:9px;background:#83929a;overflow:visible;border-radius:2px}.track .lit{position:absolute;background:#ffbc4d;height:100%}.track .cursor{position:absolute;top:-2px;bottom:-2px;width:2px;background:#182d38;box-shadow:0 0 0 1px #fffe}.periods{font-size:11px;line-height:1.55;color:var(--dim);margin-top:9px;overflow-wrap:anywhere}.timescale{margin-top:4px;font-size:10px}.meta{font-size:11px;color:var(--dim);line-height:1.6;margin-top:14px}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:var(--dim);font-size:12px;line-height:1.65}summary{cursor:pointer;color:var(--ink);font-weight:600}details p{margin-top:5px}.hint{font-size:11px;color:var(--dim);margin-top:9px}.alert{padding:20px;color:#911}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr) 242px;gap:10px}.map-head{padding:10px}.mapbox canvas{aspect-ratio:1.55}.wrap{padding:14px}.side{padding:13px}.zone{display:none}.transport{padding:12px}.tabs button{padding:4px 10px}.mapnote{margin:0}.mapinfo{padding:8px 10px}}
+@media(max-width:680px){header{align-items:flex-start;flex-wrap:wrap;gap:11px;margin-bottom:12px}.grid{grid-template-columns:1fr}.mapbox canvas{aspect-ratio:1.32}.map-head{gap:5px}.map-head h2{font-size:14px}.map-head .switch button{padding:2px 6px}.mode{gap:4px}.side{padding:16px}.fieldrow{margin-top:10px}.time{font-size:20px}.playline{gap:9px}.ticks{font-size:10px}.side label.wide{margin-bottom:12px}.compass{right:6px;top:6px}.skyinfo{font-size:11px;padding:8px 10px}.hint{font-size:10px}}
+ 
+.mapbox canvas{touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;aspect-ratio:1.72}
+.mapbox canvas.dragging{cursor:grabbing}.maptools{position:absolute;right:12px;bottom:12px;display:flex;gap:2px;border-radius:6px;border:1px solid #bfcac5;overflow:hidden;background:#fcfdf8ed}
+.maptools button{border:0;background:transparent;padding:4px 9px;color:#284c58;font-size:16px;min-height:31px}
+.maptools button:last-child{font-size:12px;border-left:1px solid #d4ddd8}.maphint{font-size:11px;color:var(--dim);background:#f6f8f4;padding:6px 16px}
+#hover{position:absolute;pointer-events:none;background:#193c46ef;color:white;border-radius:4px;font-size:12px;padding:5px 8px;max-width:230px}
+.side-tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:13px}.side-tabs button{padding:6px 10px;border:0;border-radius:4px;color:var(--dim);background:transparent;font-size:14px;font-weight:600}.side-tabs [aria-pressed=true]{color:var(--ink);background:#e5eeeb}
+#externalPanel label{font-size:12px}.external-head{display:flex;gap:6px;align-items:center;margin:18px 0 12px;color:var(--ink)}.external-head h2{font-size:17px}.external-head small{margin-left:auto;color:var(--dim)}.external-height{font-size:16px;line-height:1.6;color:#244751;font-weight:650}.external-copy{font-size:12px;line-height:1.75;color:var(--dim);margin-top:9px;overflow-wrap:anywhere}.external-copy a{color:#176373}.blocker{font-size:11px;line-height:1.5;color:var(--dim);margin-top:7px}.blocker button{font-size:11px;line-height:1.5;padding:1px 4px;margin-left:2px;border-radius:3px;border:1px solid #becdc7;color:#24525d;background:#f3f7f3;text-align:left}.external-actions{display:flex;gap:6px;margin:13px 0}.external-actions button{background:#e6eeeb;border:1px solid #c5d4ce;padding:5px 10px;border-radius:4px;color:#254e59}.key{width:13px;height:9px;background:#afa49b;border:1px solid #83928b;border-radius:2px}.key.model{background:#82a6a6}.key.hit{background:#bf9a7b}.key.ext{background:#b4beb9}.mapinfo{gap:7px 11px}
+@media(max-width:680px){.mapbox canvas{aspect-ratio:1.15}.maphint{font-size:10px;padding:7px 10px}.maptools{right:6px;bottom:7px}.maptools button{min-height:29px;padding:3px 8px}.mapnote{width:100%}}
+#ticks{display:block;position:relative;height:19px}#ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}#ticks .first{transform:none}#ticks .last{transform:translateX(-100%)}.track .cursor{transform:translateX(-50%)}.skyinfo{font-variant-numeric:tabular-nums}.time{min-width:8ch}
+#map{position:relative;z-index:1}.mapbox canvas.scene-layer,.mapbox canvas.bearing{position:absolute;top:0;left:0;width:100%;height:100%;aspect-ratio:auto;pointer-events:none;touch-action:auto;cursor:default}
+.mapbox canvas.bearing{width:72px;height:64px;z-index:6}.mapbox canvas[hidden]{display:none}
+.compass,.maptools,#hover{z-index:7}
+.transport{container-type:inline-size}
+@container(max-width:490px){#ticks .intermediate{display:none}}
+.day-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.rank-link{color:var(--blue);font-size:13px;text-underline-offset:3px}
+.door-fields{margin:8px 0 16px}.door-fields select:disabled{opacity:1;color:var(--ink);background:#f2f5f3}
+.day-results{grid-column:1 / -1}.day-results>details{margin:0;padding:12px 17px}
+#rankings{padding:17px;scroll-margin-top:12px}#rankings h2{font-size:17px}
+#rankSummary{margin:8px 0 3px;font-size:14px;line-height:1.6;color:var(--ink)}#rankHomes,.rank-method{font-size:12px;line-height:1.6;color:var(--dim)}
+#rankList{list-style:none;padding:0;margin:12px 0 0;border-top:1px solid var(--line)}
+.rank-home{display:grid;grid-template-columns:3.7em minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;padding:9px 3px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);font-size:13px}
+.rank-home:hover,.rank-home[aria-pressed=true]{background:#edf4f1}.rank-home:focus-visible{outline-offset:-2px}.rank-number,.rank-phase,.rank-probes{color:var(--dim);font-size:11px}.rank-number{white-space:nowrap}.rank-home strong,.rank-home small{display:block}.rank-probes{text-align:right;margin-top:2px}.rank-duration{text-align:right;font-variant-numeric:tabular-nums}
+#rankMore{margin-top:10px;padding:6px 10px;color:var(--blue);background:#f4f7f5;border:1px solid var(--line);border-radius:4px;font-size:12px}.rank-method{margin-top:9px}
+@media(max-width:450px){#rankings{padding:12px}.rank-home{grid-template-columns:3.2em minmax(0,1fr) auto;gap:4px}.rank-home strong{font-size:12px}.day-nav{gap:10px}}
+.bridge-link{padding:3px 0;border:0;background:transparent;color:#495579;font:inherit;text-decoration:underline;text-underline-offset:2px}.bridge-link[hidden]{display:none}.key.bridge{width:17px;height:8px;border:0;border-top:3px solid #646e89;border-radius:0;background:linear-gradient(to right,transparent 15%,#646e89 15% 30%,transparent 30% 70%,#646e89 70% 85%,transparent 85%)}
+</style></head>
+<body><main class="wrap">
+<header><div><h1>一里南侧地块三维日照回放</h1><p id="subtitle">天津河西 · 南向窗台直射</p></div><div class="day-nav"><div id="dayTabs" class="tabs" role="group" aria-label="日期"></div><a class="rank-link" href="#rankings">看住户排行 ↓</a></div></header>
+<div class="grid">
+<section class="panel" aria-label="动画与播放控制">
+<div class="map-head"><h2>楼群与阴影</h2><div class="mode"><div class="switch" role="group" aria-label="视角"><button data-view="iso" aria-pressed="true">三维</button><button data-view="plan" aria-pressed="false">俯视</button></div><div class="switch" role="group" aria-label="范围"><button data-scope="site" aria-pressed="true">地块</button><button data-scope="all" aria-pressed="false">含周边</button></div></div></div>
+<div class="mapbox"><canvas id="map" tabindex="0" aria-label="三维日照模型，可拖动和缩放。方向键旋转，按住 Shift 平移，加减号缩放，Home 复位" aria-describedby="mapHint"></canvas><span id="hover" hidden></span><div class="compass"><svg viewBox="0 0 16 26" aria-hidden="true"><g id="north"><path d="M8 2 L13 20 L8 17 L3 20 Z" fill="#34535f"/><path d="M8 2 L8 17 L3 20 Z" fill="#a9b7ba"/></g></svg>北</div><div class="maptools" aria-label="相机控制"><button id="zoomOut" aria-label="缩小">−</button><button id="zoomIn" aria-label="放大">＋</button><button id="resetCam">复位</button></div></div>
+<div id="mapHint" class="maphint"></div>
+<div class="mapinfo"><span class="legend"><i class="key model"></i>住宅</span><span class="legend"><i class="key hit"></i>当日遮挡窗台的周边楼</span><span class="legend"><i class="key ext"></i>其他周边楼</span><button hidden type="button" id="bridgeLink" class="legend bridge-link" title="在三维图中查看西侧立交桥及模型尺寸"><i class="key bridge" aria-hidden="true"></i>西侧立交桥</button><span class="legend"><i class="dot"></i>窗台见光</span><span class="legend"><i class="dot dark"></i>窗台受遮</span><span class="legend"><i class="shadow-swatch"></i>阴影</span><span id="planeNote" class="mapnote"></span></div>
+<div class="transport"><div class="playline"><button id="play" class="play"></button><strong class="time" id="clock"></strong><span class="zone">北京时间</span><select id="speed" class="speed" aria-label="播放倍速"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></div><input id="scrub" class="slider" type="range" min="0" step="any" value="0" aria-label="日出至日落回放时间"><div class="ticks" id="ticks"></div></div>
+<div class="skyinfo"><span>太阳高度 <b id="alt"></b>　方位 <b id="az"></b></span><span id="sampleTime"></span></div>
+</section>
+<aside class="panel side"><div class="side-tabs" role="group" aria-label="观察对象"><button id="homesTab" aria-pressed="true">住宅窗台</button><button id="externalsTab" aria-pressed="false">周边楼高</button></div><div id="homePanel"><h2>观察住宅</h2><div class="fieldrow"><label>楼栋<select id="house"></select></label><label>住宅楼层<select id="floor"></select></label></div>
+<div class="fieldrow door-fields"><label>单元<select id="entry"></select></label><label>单元内户位<select id="unit"></select></label></div>
+<div class="probes-head"><h2>南窗测点</h2><small id="until"></small></div><div id="probes"></div><p class="meta" id="homeMeta"></p><div class="external-actions"><button id="focusHome">聚焦这栋住宅</button></div></div>
+<div id="externalPanel" hidden><label>周边建筑与设施<select id="external"></select></label><div class="external-head"><h2 id="extName"></h2><small id="extId"></small></div><div class="external-height" id="extHeight"></div><p class="external-copy" id="extSpan"></p><p class="external-copy" id="extReview"></p><div class="external-copy" id="extSource"></div><p class="external-copy" id="extImpact"></p><div class="external-actions"><button id="focusExt">聚焦这栋建筑</button></div></div>
+</aside>
+<div class="panel day-results">
+<section id="rankings" aria-labelledby="rankTitle">
+<h2 id="rankTitle">全天日照最长的住户</h2><p id="rankSummary"></p><p id="rankHomes"></p>
+<ol id="rankList" aria-label="住户日照排行"></ol>
+<button id="rankMore" type="button" aria-controls="rankList" aria-expanded="false" hidden></button>
+<p class="rank-method">从日出算到日落，按每户各南窗测点的平均直射时长排名。点击一户可在三维图中查看。</p>
+</section>
+<details><summary>计算口径</summary><p>时间轴从当地日出播到日落，均为北京时间。太阳方向和楼影连续移动。窗台见光与遮挡按 5 分钟区间的中点射线判定，日出、日落附近的短区间单独采样。金色时段为模型直射时间。日出、日落按太阳上边缘升过或落到地平线的时刻计算；窗台射线指向太阳中心。太阳很低时，模型以外的远处建筑也可能挡光。</p><p>住宅首层从首个模型住宅层起算。主方案的窄楼只有一个单元，宽楼从东向西分成东单元和西单元。每个单元分东户和西户，每户南窗 A 点偏东、B 点偏西。分户边界与窗位按面宽推估。周边建筑和立交桥的建模高度与来源可在周边面板查看。</p><p>俯视阴影取所选楼层窗台标高，点色取各栋实际窗台的射线结果。三维模型按实际米制尺寸绘制，并随视角更新楼面遮挡与窗台可见性。周边楼按当前节气是否遮挡过住宅窗台着色。当一条射线遇到多个遮挡物时，面板显示最靠近窗台的一个。</p></details></div>
+</div><p class="hint">底图采用 2026 年 11 月 2 日一期方案公示。后续分期楼位按图示计入。点住宅或窗台可选择观察户，点周边建筑或设施可核对高度和资料来源。</p>
+</main>
+<script type="application/json" id="scene">
+__SUN_SCENE__
+</script>
+<script>
+__SUN_ORBIT_JS__
+</script>
+<script>
+'use strict';
+const sc=JSON.parse(document.getElementById('scene').textContent);
+const el=id=>document.getElementById(id);
+const c=el('map'),screen=c.getContext('2d');
+let g=screen;
+const homes=sc.buildings.filter(b=>b.is_target).sort((a,b)=>parseInt(a.id)-parseInt(b.id));
+const selected={day:'冬至',bid:homes[0].id,unit:'西户',floor:1,frame:0,minute:sc.days['冬至'].start,playing:!matchMedia('(prefers-reduced-motion: reduce)').matches,view:'iso',scope:document.querySelector('[data-scope][aria-pressed="true"]').dataset.scope,speed:1};
+const pointByHome=new Map(), allPts=sc.points;
+for(let i=0;i<allPts.length;i++){const p=allPts[i];if(!pointByHome.has(p.bid))pointByHome.set(p.bid,new Map());const units=pointByHome.get(p.bid);if(!units.has(p.unit))units.set(p.unit,[]);units.get(p.unit).push(i)}
+function addressOf(bid,unit){return allPts[pointByHome.get(bid).get(unit)[0]]}
+function addressesFor(bid){return [...pointByHome.get(bid).keys()].map(unit=>addressOf(bid,unit))}
+const byId=new Map(sc.buildings.map(b=>[b.id,b]));
+const dayList=['大寒','冬至','春分'];
+let hitTests=[],sideView='home',exterior=null;
+let animationId=0,lastTick=null,lastPanelKey='',lastClockSecond=-1;
+const externals=sc.buildings.filter(b=>b.group==='external');
+const bridges=externals.filter(b=>b.kind==='bridge');
+const bridgeDecks=b=>[b,...(b.parts||[]).filter(part=>part.kind==='deck')];
+const orbit=new SunOrbit(sc,c,selected.scope);
+const box=c.parentElement;
+function placeLayer(canvas,z){
+ canvas.className='scene-layer';canvas.setAttribute('aria-hidden','true');canvas.style.zIndex=z;box.append(canvas);
+}
+placeLayer(orbit.layer,3);
+const bearing=document.createElement('canvas');bearing.className='bearing';bearing.setAttribute('aria-hidden','true');box.append(bearing);
+const bearingContext=bearing.getContext('2d');
+const planCam={x:0,y:0,zoom:1};
+const impact=(b)=>Number(b.shadow_impact?.[selected.day]||0);
+function inspect(tab){
+  sideView=tab;
+  el('homePanel').hidden=tab!=='home';el('externalPanel').hidden=tab!=='ext';
+  el('homesTab').setAttribute('aria-pressed',String(tab==='home'));el('externalsTab').setAttribute('aria-pressed',String(tab==='ext'));
+  if(tab==='ext'){
+    if(!exterior)exterior=externals.slice().sort((a,b)=>impact(b)-impact(a))[0]?.id;
+    showExterior();
+  }
+}
+let reviewedKey='';
+function showExterior(){
+  const b=byId.get(exterior);if(!b)return;
+  const key=b.id+'|'+selected.day;if(reviewedKey===key)return;reviewedKey=key;
+  const proof=b.height_review||{};
+  el('external').value=b.id;el('extName').textContent=b.name;el('extId').textContent=b.id;
+  const estimated=b.estimated??proof.estimated;
+  const limits=Array.isArray(proof.range)?proof.range:b.roof_height_range;
+  const bridge=b.kind==='bridge',dimensions=[];
+  if(bridge){
+    const decks=bridgeDecks(b),piers=(b.parts||[]).filter(p=>p.kind==='pier');
+    el('extHeight').textContent='桥面顶标高 '+spanText(decks.map(d=>d.top))+' 米'+(estimated?'（估算）':'');
+    dimensions.push('桥面底标高 '+spanText(decks.map(d=>d.base))+' 米','桥面结构厚度 '+spanText(decks.map(d=>d.top-d.base))+' 米');
+    dimensions.push(piers.length?'模型含 '+piers.length+' 个桥墩':'模型仅含桥面');
+  }else{
+    el('extHeight').textContent=(b.base===0?'算阴影采用的屋顶高度 ':'算阴影采用的顶面标高 ')+num(b.top)+' 米'+(estimated?'（估算）':'');
+    dimensions.push('模型基底 '+num(b.base)+' m');
+    if(b.floors>0)dimensions.push('地上 '+b.floors+' 层');
+    if(b.base===0 && Number.isFinite(proof.previous_roof_m) && Math.abs(proof.previous_roof_m-b.top)>.051)dimensions.push('复核前 '+num(proof.previous_roof_m)+' m');
+  }
+  el('focusExt').textContent=bridge?'聚焦立交桥':'聚焦这栋建筑';
+  if(Array.isArray(limits))dimensions.push('高度取值区间 '+limits.map(num).join('–')+' m');
+  el('extSpan').textContent=dimensions.join(' · ');
+  el('extReview').textContent=[proof.status||'高度待核',proof.summary].filter(Boolean).join(' · ');
+  const source=el('extSource');source.replaceChildren();
+  const links=[...(proof.references||[]),{url:proof.url,title:proof.source_label}];
+  const seen=new Set();
+  let more=null;
+  for(const ref of links){
+    if(!ref?.url || !/^https?:\/\//i.test(ref.url)||seen.has(ref.url))continue;
+    if(seen.size===3 && !bridge)break;
+    seen.add(ref.url);
+    if(seen.size===4){
+      more=document.createElement('details');const summary=document.createElement('summary');
+      summary.textContent='更多桥位资料';more.append(summary);source.append(more);
+    }
+    const area=more||source;
+    if(seen.size>1 && seen.size!==4)area.append(' · ');
+    const a=document.createElement('a');a.href=ref.url;a.textContent=ref.title||'查看资料';
+    a.target='_blank';a.rel='noopener noreferrer';area.append(a);
+  }
+  if(!seen.size && proof.source_label)source.textContent=proof.source_label;
+  if(bridge){
+    const credit=document.createElement('a');credit.href='https://www.openstreetmap.org/copyright';
+    credit.textContent='© OpenStreetMap contributors';credit.target='_blank';credit.rel='noopener noreferrer';
+    const creditLine=document.createElement('p');creditLine.append('桥位线数据 ',credit);source.append(creditLine);
+  }
+  const n=impact(b),object=bridge?'这座桥':'此楼';
+  el('extImpact').textContent=b.shadow_impact ?
+    (n?selected.day+'从日出到日落，各窗台被'+object+'遮挡的时长合计 '+n.toLocaleString('zh-CN')+' 点·分钟，只计沿射线最靠近窗台的遮挡物。':selected.day+'从日出到日落，'+object+'作为窗台最近遮挡物的合计为 0 点·分钟。'):'';
+}
+function spanText(values){
+  const low=num(Math.min(...values)),high=num(Math.max(...values));
+  return low===high?String(low):low+'–'+high;
+}
+function pickBuilding(b,unit){
+  if(b.group==='external'){exterior=b.id;inspect('ext');draw();return}
+  if(!b.is_target)return;
+  const prior=addressOf(selected.bid,selected.unit),addresses=addressesFor(b.id);
+  const next=addresses.find(a=>a.unit===unit)||addresses.find(a=>a.entry===prior.entry&&a.door===prior.door)||
+             addresses.find(a=>a.door===prior.door)||addresses[0];
+  inspect('home');Object.assign(selected,{bid:b.id,floor:Math.min(selected.floor,b.floors),unit:next.unit});
+  initSelection();
+}
+function formatTime(minute,seconds=false){
+ const total=seconds?Math.round(minute*60):Math.round(minute)*60;
+ const pad=n=>String(n).padStart(2,'0');
+ return pad(Math.floor(total/3600))+':'+pad(Math.floor(total/60)%60)+(seconds?':'+pad(total%60):'');
+}
+const durationText=minutes=>Number(minutes.toFixed(1))+' 分';
+function preceding(items,value,get){
+ let lo=0,hi=items.length;
+ while(lo<hi){const mid=(lo+hi)>>1;if(get(items[mid])<=value)lo=mid+1;else hi=mid}
+ return Math.max(lo-1,0);
+}
+function currentSky(day){
+ const minute=selected.minute,path=day.solar_path;
+ const i=preceding(path,minute,k=>k.minute),a=path[i],b=path[Math.min(i+1,path.length-1)];
+ const t=b.minute>a.minute?(minute-a.minute)/(b.minute-a.minute):0;
+ const d=a.direction.map((v,j)=>v+(b.direction[j]-v)*t),len=Math.hypot(...d);
+ const direction=d.map(v=>v/len);
+ return {direction,altitude:Math.asin(direction[2])*180/Math.PI,
+   azimuth:(Math.atan2(direction[0],direction[1])*180/Math.PI+360)%360,
+   masks:day.frames[selected.frame].masks};
+}
+function options(select,values,key,label){select.replaceChildren(...values.map(v=>new Option(label(v),key(v))))}
+function toggleGroup(query,name,state){document.querySelectorAll(query).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[name]===state)))}
+function lit(mask,k){return typeof mask==='string' ? (BigInt(mask)&(1n<<BigInt(k-1)))!==0n : Math.floor(mask/2**(k-1))%2===1}
+const runtimeSamples=new Map();
+function sample(ip,k){
+ const key=[selected.day,ip,k].join('|');if(runtimeSamples.has(key))return runtimeSamples.get(key);
+ const ds=sc.days[selected.day];let count=0,runs=[],prefix=[];
+ ds.frames.forEach((f,i)=>{prefix[i]=count;if(lit(f.masks[ip],k)){count+=f.end-f.start;if(runs.length&&runs.at(-1)[1]===f.start)runs.at(-1)[1]=f.end;else runs.push([f.start,f.end])}});
+ const record={count,runs,prefix};runtimeSamples.set(key,record);return record;
+}
+function makeCards(){
+ const ds=sc.days[selected.day],ids=pointByHome.get(selected.bid).get(selected.unit);
+ el('probes').replaceChildren(...ids.map(ip=>{
+   const entry=sample(ip,selected.floor),node=document.createElement('section');node.className='probe';node.dataset.ip=ip;
+   node.innerHTML='<div class="probe-title"><strong></strong><span class="status"></span></div><div class="blocker" hidden><span></span><button type="button" hidden></button></div><div class="duration"><span>已累计 <b class="sum"></b></span><span>全天 <b class="total"></b></span></div><div class="track"></div><div class="timescale"><span></span><span></span></div><p class="periods"></p>';
+   const blockerButton=node.querySelector('.blocker button');
+   blockerButton.onclick=()=>{if(blockerButton.dataset.id){exterior=blockerButton.dataset.id;inspect('ext');draw()}};
+   const relative=ids.length===2?(allPts[ip].x>allPts[ids.find(j=>j!==ip)].x?' · 偏东':' · 偏西'):'';
+   node.querySelector('strong').textContent=allPts[ip].label+' 点'+relative;node.querySelector('.total').textContent=durationText(entry.count);
+   const tr=node.querySelector('.track');entry.runs.forEach(([a,b])=>{let s=document.createElement('span');s.className='lit';s.style.left=(a-ds.start)*100/(ds.end-ds.start)+'%';s.style.width=(b-a)*100/(ds.end-ds.start)+'%';tr.append(s)});let cursor=document.createElement('i');cursor.className='cursor';tr.append(cursor);
+   const ticks=node.querySelector('.timescale').children;ticks[0].textContent=formatTime(ds.start);ticks[1].textContent=formatTime(ds.end);
+   node.querySelector('.periods').textContent=entry.runs.length?'见光 '+entry.runs.map(r=>r.map(t=>formatTime(t)).join('–')).join(' / '):'本时段无直射';
+   return node;
+ }));
+}
+let rankingDay=null,rankExpanded=false;
+function rankDuration(seconds){
+ const minutes=Math.round(seconds/60),hours=Math.floor(minutes/60);
+ return (hours?hours+' 小时 ':'')+(minutes%60)+' 分';
+}
+function floorText(floors){
+ const ranges=[];
+ for(const floor of [...new Set(floors)].sort((a,b)=>a-b)){
+   const tail=ranges.at(-1);
+   if(tail&&floor===tail[1]+1)tail[1]=floor;
+   else ranges.push([floor,floor]);
+ }
+ return ranges.map(([a,b])=>a===b?String(a):a+'–'+b).join('、')+'层';
+}
+function describeHomes(rows){
+ const buildings=new Map();
+ for(const {bid,unit,floor} of rows){
+   if(!buildings.has(bid))buildings.set(bid,new Map());
+   const units=buildings.get(bid);
+   if(!units.has(unit))units.set(unit,[]);
+   units.get(unit).push(floor);
+ }
+ const descriptions=[];
+ for(const [bid,units] of buildings){
+   const byFloor=new Map();
+   for(const [unit,floors] of units){
+     const label=floorText(floors);
+     if(!byFloor.has(label))byFloor.set(label,[]);
+     byFloor.get(label).push(unit);
+   }
+   const levels=[];
+   for(const [level,names] of byFloor){
+     const doorsByEntry=new Map();
+     for(const name of names){
+       const {entry,door}=addressOf(bid,name);
+       if(!doorsByEntry.has(entry))doorsByEntry.set(entry,[]);
+       doorsByEntry.get(entry).push(door);
+     }
+     const addresses=[...doorsByEntry].map(([entry,doors])=>(entry?entry+'的':'')+doors.join('、'));
+     levels.push(level+' '+addresses.join('及'));
+   }
+   descriptions.push(bid+' '+levels.join('，'));
+ }
+ return descriptions.join('，');
+}
+function renderRanks(){
+ const day=selected.day,{households,rows}=sc.days[day].household_leaders;
+ const leaders=rows.filter(r=>r.rank===1);
+ const firstPhase=leaders.filter(r=>byId.get(r.bid).phase==='一期申报');
+ el('rankSummary').textContent=day+'的 '+households+' 户中，'+leaders.length+' 户'+(leaders.length>1?'并列':'排名')+'第一，平均日照约 '+rankDuration(leaders[0].mean_seconds)+'。';
+ el('rankHomes').textContent=firstPhase.length?'其中 '+firstPhase.length+' 户在一期申报楼栋，分别是 '+describeHomes(firstPhase)+'。':'日照最长的住户为 '+describeHomes(leaders)+'。';
+
+ // Show a representative from each building at the same rank before repeating
+ // a building. Expanding restores the original building/floor/household order.
+ const preview=[];
+ for(const rank of new Set(rows.map(r=>r.rank))){
+   const tied=rows.filter(r=>r.rank===rank);
+   const first=[],rest=[],seen=new Set();
+   for(const r of tied){
+     if(seen.has(r.bid))rest.push(r);
+     else{first.push(r);seen.add(r.bid)}
+   }
+   preview.push(...first,...rest);
+ }
+ const visible=rankExpanded?rows:preview.slice(0,5);
+ const rankCounts=new Map();
+ for(const row of rows)rankCounts.set(row.rank,(rankCounts.get(row.rank)||0)+1);
+ el('rankList').replaceChildren(...visible.map(row=>{
+   const item=document.createElement('li'),button=document.createElement('button');
+   button.type='button';button.className='rank-home';
+   const {entry,door}=addressOf(row.bid,row.unit);
+   Object.assign(button.dataset,{bid:row.bid,floor:row.floor,unit:row.unit,entry,door});
+   button.innerHTML='<span class="rank-number"></span><span><strong class="rank-address"></strong><small class="rank-phase"></small></span><span><strong class="rank-duration"></strong><small class="rank-probes"></small></span>';
+   button.querySelector('.rank-number').textContent=(rankCounts.get(row.rank)>1?'并列第':'第')+row.rank;
+   button.querySelector('.rank-address').textContent=[row.bid,row.floor+'层',entry,door].filter(Boolean).join(' · ');
+   button.querySelector('.rank-phase').textContent=byId.get(row.bid).phase;
+   button.querySelector('.rank-duration').textContent='约 '+rankDuration(row.mean_seconds);
+   button.querySelector('.rank-probes').textContent=Object.entries(row.probe_seconds).map(([label,s])=>label+' '+durationText(s/60)).join(' · ');
+   item.append(button);return item;
+ }));
+ const more=el('rankMore');
+ more.hidden=rows.length<=5;more.textContent=rankExpanded?'收起列表':'展开全部 '+rows.length+' 户';
+ more.setAttribute('aria-expanded',String(rankExpanded));
+ markRankSelection();
+}
+function markRankSelection(){
+ for(const button of el('rankList').querySelectorAll('button')){
+   const {bid,floor,unit}=button.dataset;
+   button.setAttribute('aria-pressed',String(bid===selected.bid&&Number(floor)===selected.floor&&unit===selected.unit));
+ }
+}
+el('rankMore').onclick=()=>{rankExpanded=!rankExpanded;renderRanks()};
+el('rankList').onclick=e=>{
+ const button=e.target.closest('button[data-bid]');if(!button)return;
+ const {bid,floor,unit}=button.dataset;
+ inspect('home');Object.assign(selected,{bid,floor:Number(floor),unit});
+ initSelection();focusBuilding(byId.get(bid));
+ document.querySelector('.map-head').scrollIntoView({block:'start'});c.focus({preventScroll:true});
+};
+function initSelection(){
+ const b=byId.get(selected.bid);
+ const addresses=addressesFor(b.id),active=addresses.find(a=>a.unit===selected.unit)||addresses[0];
+ selected.unit=active.unit;
+ const entries=[...new Set(addresses.map(a=>a.entry))];
+ options(el('entry'),entries,e=>e,e=>e||'单元待核');el('entry').value=active.entry;
+ el('entry').disabled=entries.length===1;
+ options(el('unit'),addresses.filter(a=>a.entry===active.entry),a=>a.unit,a=>a.door);
+ el('unit').value=active.unit;
+ if(el('floor').length!==b.floors){
+   options(el('floor'),Array.from({length:b.floors},(_,i)=>i+1),v=>v,v=>v+' 层');
+ }
+ el('floor').value=String(selected.floor);el('house').value=selected.bid;
+ el('homeMeta').textContent=(b.phase||'住宅')+' · '+b.floors+' 个住宅层 · 模型顶面标高 '+num(b.top)+' m';
+ const ds=sc.days[selected.day],scrub=el('scrub');scrub.min=ds.start;scrub.max=ds.end;
+ const tickMinutes=[ds.start,...[540,720,900].filter(t=>t-ds.start>58&&ds.end-t>58),ds.end];
+ el('ticks').replaceChildren(...tickMinutes.map(t=>{
+   const label=document.createElement('span'),first=t===ds.start,last=t===ds.end;
+   label.style.left=100*(t-ds.start)/(ds.end-ds.start)+'%';label.className=first?'first':last?'last':t===720?'noon':'intermediate';
+   label.textContent=(first?'日出 ':last?'日落 ':'')+formatTime(t);
+   label.title=formatTime(t,true)+' 北京时间';return label;
+ }));
+ el('subtitle').textContent='天津河西 · '+ds.date+' · '+selected.day+' · 南向窗台直射';
+ if(rankingDay!==selected.day){rankingDay=selected.day;rankExpanded=false;renderRanks()}
+ else markRankSelection();
+ toggleGroup('[data-day]','day',selected.day);makeCards();lastPanelKey='';lastClockSecond=-1;redraw();
+}
+const num=v=>Number(v.toFixed(2));
+const pt=t=>[t.x,t.y];
+function bounds(p){return [Math.min(...p.map(v=>v[0])),Math.min(...p.map(v=>v[1])),Math.max(...p.map(v=>v[0])),Math.max(...p.map(v=>v[1]))]}
+const bodies=sc.buildings.flatMap(b=>[b,...(b.parts||[])].map(solid=>({
+  owner:b,poly:solid.polygon,lo:solid.base,hi:solid.top,centerline:solid.centerline
+})));
+const baseB=bounds(sc.site_polygon),allB=bounds(bodies.flatMap(body=>body.poly));
+const planBodies=bodies.filter(body=>body.owner.group!=='podium').sort((a,b)=>a.hi-b.hi);
+function viewing(w,h){
+ if(selected.view==='iso')return orbit.cameraView(w,h);
+ const raw=selected.scope==='site'?baseB:allB;
+ const s=planCam.zoom*Math.min((w-16)/(raw[2]-raw[0]+24),(h-16)/(raw[3]-raw[1]+28));
+ const ox=w/2-s*((raw[0]+raw[2])/2+planCam.x),oy=h/2+s*((raw[1]+raw[3])/2+planCam.y);
+ return {s,P:(x,y)=>[ox+s*x,oy-s*y]};
+}
+function pathPoly(poly,P,z=0){
+ let path=new Path2D();poly.forEach(([x,y],i)=>{const [a,b]=P(x,y,z);if(i===0)path.moveTo(a,b);else path.lineTo(a,b)});path.closePath();return path;
+}
+function paint(path,fill,stroke,width=1){if(fill){g.fillStyle=fill;g.fill(path)}if(stroke){g.strokeStyle=stroke;g.lineWidth=width;g.stroke(path)}}
+function textAt(txt,x,y,size,col,align='center',bold=false,halo=false){
+ g.font=(bold?'600 ':'')+size+'px "PingFang SC","Microsoft YaHei",sans-serif';g.textAlign=align;g.textBaseline='middle';
+ if(halo){g.strokeStyle='#f5f7f3';g.lineWidth=2.8;g.lineJoin='round';g.strokeText(txt,x,y)}g.fillStyle=col;g.fillText(txt,x,y)
+}
+function line(a,b,color,width,dash=[]){g.beginPath();g.moveTo(...a);g.lineTo(...b);g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash);g.stroke();g.setLineDash([])}
+function twiceArea(poly){let a=0;for(let j=0;j<poly.length;j++){const p=poly[j],q=poly[(j+1)%poly.length];a+=p[0]*q[1]-p[1]*q[0]}return a}
+// Cache geometry in screen space while the camera and analysis plane are fixed.
+// Only the exposed outward edges need sweeping to project each prismatic solid.
+function shadowGeometry(z,P,w,h){
+ const center=[w/2,h/2],diagonal=Math.hypot(w,h)/2;
+ const faces=[];
+ for(const {poly,lo,hi} of bodies){
+   if(hi<=z)continue;
+   const ring=poly.map(([x,y])=>P(x,y,z));
+   if(twiceArea(ring)<0)ring.reverse();
+   const reach=diagonal+Math.max(...ring.map(([x,y])=>Math.hypot(x-center[0],y-center[1])))+2;
+   faces.push({ring,reach,lo:Math.max(lo-z,0),hi:hi-z});
+ }
+ const origin=P(0,0,z),x=P(1,0,z),y=P(0,1,z);
+ return {faces,xx:x[0]-origin[0],xy:x[1]-origin[1],yx:y[0]-origin[0],yy:y[1]-origin[1]};
+}
+function shadowPath(model,dir){
+ const path=new Path2D();
+ if(dir[2]<=0)return path;
+ const dx=-(model.xx*dir[0]+model.yx*dir[1])/dir[2],dy=-(model.xy*dir[0]+model.yy*dir[1])/dir[2];
+ const shift=Math.hypot(dx,dy);
+ for(const {ring,reach,lo,hi} of model.faces){
+   if(lo*shift>reach)continue;
+   // Beyond reach both cap and outgoing edge are off screen, even at sunrise.
+   const high=shift?Math.min(hi,reach/shift):hi;
+   const bx=dx*lo,by=dy*lo,tx=dx*high,ty=dy*high;
+   path.moveTo(ring[0][0]+bx,ring[0][1]+by);
+   for(let k=1;k<ring.length;k++)path.lineTo(ring[k][0]+bx,ring[k][1]+by);
+   path.closePath();
+   let a=ring[ring.length-1];
+   for(const b of ring){
+     if((b[0]-a[0])*dy-(b[1]-a[1])*dx<0){
+       path.moveTo(a[0]+bx,a[1]+by);path.lineTo(a[0]+tx,a[1]+ty);
+       path.lineTo(b[0]+tx,b[1]+ty);path.lineTo(b[0]+bx,b[1]+by);path.closePath();
+     }
+     a=b;
+   }
+ }
+ return path;
+}
+// The browser composites these stationary surfaces. Copying all full-size layers
+// onto one viewport 60 times a second stalls software compositors on Retina displays.
+const layers=new Map();
+const layerOrder={ground:0,annotations:4};
+function cachedLayer(id,key,paintLayer){
+ let slot=layers.get(id);
+ if(!slot){
+   const canvas=document.createElement('canvas');placeLayer(canvas,layerOrder[id]);
+   slot={canvas,ctx:canvas.getContext('2d'),key:null};layers.set(id,slot);
+ }
+ const {canvas,ctx}=slot;
+ if(canvas.hidden)canvas.hidden=false;
+ if(slot.key===key)return;
+ const dpr=Math.min(2,devicePixelRatio||1);
+ const wp=Math.round(c.clientWidth*dpr),hp=Math.round(c.clientHeight*dpr);
+ if(canvas.width!==wp||canvas.height!==hp){canvas.width=wp;canvas.height=hp}
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,c.clientWidth+1,c.clientHeight+1);
+ g=ctx;
+ try{paintLayer()}finally{g=screen}
+ slot.key=key;
+}
+let shadowCache={key:null},planHits=[],markerHits=[];
+function draw(sky){
+ const w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;const dpr=Math.min(selected.playing||c.classList.contains('dragging')?1:1.5,devicePixelRatio||1);
+ if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr)}
+ g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w+1,h+1);
+ const {s,P}=viewing(w,h),iso=selected.view==='iso',siteOnly=selected.scope==='site',active=byId.get(selected.bid);
+ const ds=sc.days[selected.day],f=sky?.direction?sky:currentSky(ds),dir=f.direction,level=selected.floor,ref=iso?0:active.sill_base+(level-1)*active.floor_height;
+ const cam=iso?orbit.camera:planCam;
+ const cameraKey=[selected.view,selected.scope,devicePixelRatio,w,h,...Object.values(cam),...(iso?orbit.span:[])].join('|');
+ const selectionKey=[cameraKey,selected.day,selected.bid,level,selected.unit,sideView,exterior].join('|');
+ cachedLayer('ground',cameraKey,()=>{
+ g.fillStyle='#e9eeea';g.fillRect(0,0,w,h);
+ for(let x=Math.floor(allB[0]/25)*25;x<=allB[2]+80;x+=25)line(P(x,allB[1]-100),P(x,allB[3]+140),'#dae2df',.6);
+ for(let y=Math.floor((allB[1]-100)/25)*25;y<=allB[3]+140;y+=25)line(P(allB[0]-100,y),P(allB[2]+100,y),'#dae2df',.6);
+ // Road positions are map annotations from the planning sheet.
+ for(const [a,b,width] of [[[-6,-160],[-6,235],8],[[230,-160],[230,235],23],[[-220,-12],[525,-12],13],[[-220,125],[525,125],19]]){
+   line(P(...a),P(...b),'#cdd7d3',(width+.8)*s);line(P(...a),P(...b),'#f6f7f3',width*s)
+ }
+ const extents=pathPoly(sc.site_polygon,P);
+ paint(extents,'#f7f5e9','#6a817d',1);
+ if(iso&&(w>=580||siteOnly)){
+     for(const [name,x,y,dx,dy] of [['嘉江道',108,126,1,0],['沐江道',112,-13,1,0],['太湖路',230,56,0,1],['墨江道',-6,53,0,1]]){
+       const a=P(x,y),b=P(x+dx,y+dy);let angle=Math.atan2(b[1]-a[1],b[0]-a[0]);
+       if(angle>Math.PI/2)angle-=Math.PI;else if(angle< -Math.PI/2)angle+=Math.PI;
+       g.save();g.translate(...a);g.rotate(angle);textAt(name,0,0,siteOnly?11:9,'#526860','center',false,true);g.restore();
+     }
+ }
+ });
+ const shadowKey=cameraKey+'|'+ref;
+ if(shadowCache.key!==shadowKey)shadowCache={key:shadowKey,model:shadowGeometry(ref,P,w,h)};
+ // Low-angle sunlight emerges gradually from a diffuse dawn/dusk background.
+ const lowSun=Math.min(1,Math.max(0,f.altitude/2.5));
+ const daylightTone=lowSun*lowSun*(3-2*lowSun);
+ if(daylightTone<1){g.fillStyle='rgba(93,111,137,'+(.14*(1-daylightTone))+')';g.fillRect(0,0,w,h)}
+ if(daylightTone>0)paint(shadowPath(shadowCache.model,dir),'rgba(83,108,115,'+(.35*daylightTone)+')');
+ function pointsFor(b){
+  if(!b.is_target||level>b.floors)return;
+  for(const [unit,ids] of pointByHome.get(b.id)){
+    const isChosen=b.id===active.id&&unit===selected.unit;
+    const height=iso?b.sill_base+(level-1)*b.floor_height:0;
+    const coords=ids.map(i=>P(...pt(allPts[i]),height));
+    const visible=ids.map(i=>!iso || orbit.visible(allPts[i].x,allPts[i].y,height,b.id));
+    if(isChosen)for(let j=1;j<coords.length;j++)if(visible[j-1]&&visible[j])line(coords[j-1],coords[j],'#ffdc91',Math.max(1.3,s*.65));
+    ids.forEach((ip,k)=>{if(!visible[k])return;const [x,y]=coords[k],direct=lit(f.masks[ip],level);
+      const rad=(isChosen?1.2:0)+Math.max(1.6,Math.min(3.8,s*1.05));
+      g.beginPath();g.arc(x,y,rad,0,7);g.fillStyle=direct?'#ffc35d':'#324551';g.fill();
+      g.strokeStyle=isChosen?'#9a4720':direct?'#77551f':'#edf4ef';g.lineWidth=isChosen?1.65:1;g.stroke();
+      markerHits.push({x,y,r:rad+4,bid:b.id,unit});
+    });
+    if(isChosen){
+      const meanX=coords.reduce((total,p)=>total+p[0],0)/coords.length;
+      ids.forEach((ip,k)=>{
+        if(!visible[k])return;const [x,y]=coords[k],dx=Math.sign(x-meanX)*4;
+        line([x,y+4],[x+dx,y+8],'#805c35',.8);
+        textAt(allPts[ip].label,x+dx,y+12,9,'#5c3a1e','center',true,true);
+      });
+    }
+  }
+ }
+ const labelBoxes=[];
+ function labelBuilding(b){
+   if(b.group==='podium')return;
+   const bridge=b.kind==='bridge',active=b.id===selected.bid || (sideView==='ext'&&b.id===exterior);
+   let mid=null,distance=Infinity;
+   for(const solid of bridge?bridgeDecks(b):[b]){
+     const bb=bounds(solid.polygon),z=iso?solid.top:0;
+     const axis=solid.centerline;
+     const candidates=axis?.length>=2?axis.slice(1).map((p,i)=>[(p[0]+axis[i][0])/2,(p[1]+axis[i][1])/2]):[[(bb[0]+bb[2])/2,(bb[1]+bb[3])/2]];
+     for(const [x,y] of candidates){
+       const screenPos=P(x,y,z),[sx,sy]=screenPos;
+       if(sx<10||sx>w-10||sy<12||sy>h-12)continue;
+       if(iso && (!orbit.visible(x,y,z,b.id)||(bridge&&orbit.hit(sx,sy)!==b)))continue;
+       const d=Math.hypot(sx-w/2,sy-h/2);
+       if(d<distance){mid=screenPos;distance=d}
+     }
+   }
+   if(!mid)return;
+   const code=bridge?(b.name.length<=10?b.name:'立交桥'):b.is_target?String(parseInt(b.id))+'#':b.id.replace('外','');
+   const font=Math.max(bridge?10:b.is_target?9:8,Math.min(13,s*3.4));
+   const hw=font*code.length*(bridge ? .5 : .31)+2,hh=font*.55;
+   if(labelBoxes.some(([x,y,dx,dy])=>Math.abs(x-mid[0])<dx+hw && Math.abs(y-mid[1])<dy+hh))return;
+   labelBoxes.push([mid[0],mid[1],hw,hh]);
+   textAt(code,mid[0],mid[1],font,bridge?'#343d61':active?'#fff':b.is_target?'#143f4b':'#473f34','center',true,bridge||!active);
+ }
+ function bodyColors(b){
+   if(b.kind==='bridge')return sideView==='ext'&&b.id===exterior?['#555080','#383957']:['#646e89','#4c566d'];
+   if(sideView==='ext'&&b.id===exterior)return ['#ac5934','#713d2e'];
+   if(b.group==='external')return impact(b)?['#c19a79','#795e49']:['#b4beb9','#818f8a'];
+   if(b.id===active.id)return ['#37697b','#153f53'];
+   if(b.floors<level)return ['#e5e9e5','#b5c1be'];
+   return [b.phase?.includes('后续')?'#bed0cd':'#a5bec1','#647f84'];
+ }
+ function drawBridgeAxis(body){
+   if(body.owner.kind!=='bridge' || !body.centerline?.length)return;
+   // This schematic axis follows the deck. Skip samples hidden behind solids.
+   const path=new Path2D(),axis=body.centerline,z=iso?body.hi:0;
+   for(let i=1;i<axis.length;i++){
+     const [x,y]=axis[i-1],dx=axis[i][0]-x,dy=axis[i][1]-y;
+     const a=P(x,y,z),b=P(x+dx,y+dy,z);
+     if(Math.max(a[0],b[0])<0||Math.min(a[0],b[0])>w||Math.max(a[1],b[1])<0||Math.min(a[1],b[1])>h)continue;
+     if(!iso){path.moveTo(...a);path.lineTo(...b);continue}
+     const steps=Math.max(1,Math.ceil(Math.hypot(a[0]-b[0],a[1]-b[1])/2));
+     let previousVisible=false;
+     for(let j=0;j<=steps;j++){
+       const t=j/steps,px=x+t*dx,py=y+t*dy,pos=P(px,py,z);
+       const visible=orbit.hit(...pos)===body.owner&&orbit.visible(px,py,z,body.owner.id);
+       if(visible){if(previousVisible)path.lineTo(...pos);else path.moveTo(...pos)}
+       previousVisible=visible;
+     }
+   }
+   g.save();g.strokeStyle='#e5e5d7';g.lineWidth=Math.max(.65,Math.min(2,s*.24));
+   g.setLineDash([Math.max(2,s*3),Math.max(2,s*4)]);g.stroke(path);g.restore();
+ }
+ if(orbit.layer.hidden!==!iso)orbit.layer.hidden=!iso;
+ if(iso)orbit.draw(null,f,selected,sideView==='ext'?exterior:null,b=>impact(b)>0);
+ const overlayKey=selectionKey+'|'+selected.frame+'|'+(iso?orbit.pixelRatio:0);
+ cachedLayer('annotations',overlayKey,()=>{
+   if(!iso){
+   planHits=[];
+   for(const body of planBodies){
+     const b=body.owner,path=pathPoly(body.poly,P),[fill,stroke]=bodyColors(b);
+     paint(path,fill,stroke,b.id===active.id?1.6:.85);
+     drawBridgeAxis(body);
+     planHits.push({path,bid:b.id});
+   }
+   }else bodies.filter(body=>body.owner.kind==='bridge').forEach(drawBridgeAxis);
+ const labels=[byId.get(selected.bid),...(sideView==='ext'?[byId.get(exterior)]:[]),...homes,...bridges,...externals];
+ [...new Set(labels.filter(Boolean))].forEach(labelBuilding);
+ if(!iso){
+   for (const [name,x,y,rot] of [['嘉江道',110,125,0],['沐江道',110,-12,0],['太湖路',230,54,-Math.PI/2],['墨江道',-6,54,-Math.PI/2]]){
+     const t=P(x,y);g.save();g.translate(...t);g.rotate(rot);textAt(name,0,0,siteOnly&&w>400?10:8,'#627a77','center',false,true);g.restore();
+   }
+ }
+ // Scale and sun bearing in horizontal EN. The bearing arrow points to the sun.
+ const desiredMeters=68/s, power=10**Math.floor(Math.log10(desiredMeters));
+ const meters=[1,2,5,10].map(step=>step*power).reduce((a,b)=>Math.abs(a-desiredMeters)<Math.abs(b-desiredMeters)?a:b),bar=meters*s;
+ g.fillStyle='#ffffffdf';g.fillRect(10,h-32,Math.max(68,bar+17),25);line([18,h-13],[18+bar,h-13],'#37555d',1.3);
+ line([18,h-13],[18,h-17],'#37555d',1.3);line([18+bar,h-13],[18+bar,h-17],'#37555d',1.3);textAt(Number(meters.toPrecision(3))+' m',18,h-24,9,'#37555d','left');
+ const origin=P(0,0),np=P(0,1),na=Math.atan2(np[1]-origin[1],np[0]-origin[0])*180/Math.PI+90;
+ el('north').setAttribute('transform','rotate('+na+' 8 13)');
+ el('planeNote').textContent=iso?'三维楼群 · 米制等比例':'窗台高度水平面投影 · '+num(ref)+' m';
+   markerHits=[];homes.forEach(pointsFor);hitTests=iso?markerHits:[...planHits,...markerHits];
+ });
+ const bearingDpr=Math.min(2,devicePixelRatio||1);
+ if(bearing.width!==Math.round(72*bearingDpr)||bearing.height!==Math.round(64*bearingDpr)){
+   bearing.width=Math.round(72*bearingDpr);bearing.height=Math.round(64*bearingDpr);
+ }
+ g=bearingContext;g.setTransform(bearingDpr,0,0,bearingDpr,0,0);g.clearRect(0,0,72,64);
+ const origin=P(0,0),sunP=P(dir[0],dir[1]),vx=sunP[0]-origin[0],vy=sunP[1]-origin[1],length=Math.hypot(vx,vy);
+ const u=vx/length,v=vy/length, tx=39,ty=34;
+ g.fillStyle='#ffffffdb';g.beginPath();g.arc(tx,ty,26,0,7);g.fill();g.lineWidth=.8;g.strokeStyle='#c3cfca';g.stroke();
+ line([tx-8*u,ty-8*v],[tx+13*u,ty+13*v],'#98580d',1.7);g.fillStyle='#f1ad37';g.beginPath();g.arc(tx+13*u,ty+13*v,4.5,0,7);g.fill();g.strokeStyle='#8e621c';g.stroke();
+ textAt('太阳',tx,ty+17,8,'#704e19');g=screen;
+}
+function updateBlocker(entry,day,ip,on){
+ const box=entry.querySelector('.blocker'),events=day.blockers?.[ip]?.[selected.floor-1];
+ // Each entry takes effect at its first frame and lasts until the next one.
+ box.hidden=on || !events?.length;if(box.hidden)return;
+ let lo=0,hi=events.length;
+ while(lo<hi){const mid=(lo+hi)>>1;if(events[mid][0]<=selected.frame)lo=mid+1;else hi=mid}
+ const id=lo?events[lo-1][1]:-1,b=sc.buildings[id];
+ const description=box.querySelector('span'),link=box.querySelector('button');
+ link.hidden=b?.group!=='external';
+ if(!link.hidden) {
+   description.textContent='最近遮挡';link.dataset.id=b.id;
+   link.textContent=b.kind==='bridge'?b.name:b.id+' · '+b.name;link.title='查看遮挡物的高度与来源';
+ }else if(b){
+   description.textContent='最近遮挡　'+b.id+(b.id===selected.bid?'（本楼）':'');
+ }else if(id===-2){description.textContent='窗面背阳或太阳低于地平线'}
+ else{box.hidden=true}
+}
+function redraw(){
+ const day=sc.days[selected.day];
+ selected.frame=preceding(day.frames,selected.minute,f=>f.start);
+ const frame=day.frames[selected.frame],sky=currentSky(day);
+ draw(sky);
+ const key=[selected.day,selected.frame,selected.bid,selected.unit,selected.floor].join('|');
+ const binChanged=key!==lastPanelKey;
+ if(binChanged){
+   el('sampleTime').textContent='窗台采样区间 '+formatTime(frame.start,true)+'–'+formatTime(frame.end,true);
+   lastPanelKey=key;
+ }
+ const second=Math.round(selected.minute*60);
+ if(second!==lastClockSecond || binChanged){
+   const clock=formatTime(selected.minute,true);
+   el('clock').textContent=clock;el('scrub').setAttribute('aria-valuetext',clock+' 北京时间');
+   el('alt').textContent=sky.altitude.toFixed(1)+'°';el('az').textContent=sky.azimuth.toFixed(1)+'°';
+   el('until').textContent='累计至 '+clock.slice(0,5);
+   lastClockSecond=second;
+ }
+ el('scrub').value=selected.minute;
+ for(const entry of el('probes').children){
+   const ip=Number(entry.dataset.ip),on=lit(frame.masks[ip],selected.floor);
+   if(binChanged){
+     const status=entry.querySelector('.status');status.textContent=on?'见光':'受遮';status.className='status '+(on?'on':'off');
+     updateBlocker(entry,day,ip,on);
+   }
+   const total=sample(ip,selected.floor).prefix[selected.frame]+(on?selected.minute-frame.start:0);
+   const sum=entry.querySelector('.sum'),text=durationText(total);
+   if(sum.textContent!==text)sum.textContent=text;
+   entry.querySelector('.cursor').style.left=(selected.minute-day.start)*100/(day.end-day.start)+'%';
+ }
+ if(binChanged && sideView==='ext')showExterior();
+}
+function refreshPlayback(){
+ const button=el('play');
+ button.innerHTML=selected.playing?'<span class="icon">Ⅱ</span>暂停':'<span class="icon">▶</span>播放';
+ button.setAttribute('aria-label',selected.playing?'暂停动画':'播放动画');
+}
+const minutesPerSecond=8;
+function animate(timestamp){
+ animationId=0;
+ if(document.hidden)return;
+ if(selected.playing){
+   const day=sc.days[selected.day];
+   if(lastTick!==null)selected.minute=Math.min(day.end,selected.minute+(timestamp-lastTick)*.001*minutesPerSecond*selected.speed);
+   lastTick=timestamp;
+   if(selected.minute>=day.end){selected.playing=false;lastTick=null;refreshPlayback()}
+ }
+ redraw();
+ if(selected.playing)requestDraw();
+}
+function requestDraw(){
+ if(!animationId&&!document.hidden)animationId=requestAnimationFrame(animate);
+}
+function restartClock(){
+ lastTick=null;
+ if(animationId)cancelAnimationFrame(animationId);
+ animationId=0;
+ if(!document.hidden)requestDraw();
+}
+function seek(minute){
+ const day=sc.days[selected.day];selected.playing=false;
+ selected.minute=Math.max(day.start,Math.min(minute,day.end));
+ refreshPlayback();restartClock();
+}
+el('play').onclick=()=>{
+ const day=sc.days[selected.day];
+ if(!selected.playing&&selected.minute>=day.end)selected.minute=day.start;
+ selected.playing=!selected.playing;refreshPlayback();restartClock();
+};
+el('speed').onchange=e=>{selected.speed=Number(e.target.value);restartClock()};
+el('scrub').oninput=e=>seek(Number(e.target.value));
+el('scrub').onkeydown=e=>{
+ const day=sc.days[selected.day],step=e.shiftKey?5:1;
+ const next={ArrowLeft:selected.minute-step,ArrowDown:selected.minute-step,ArrowRight:selected.minute+step,
+   ArrowUp:selected.minute+step,Home:day.start,End:day.end,PageDown:selected.minute-30,PageUp:selected.minute+30}[e.key];
+ if(next!==undefined){e.preventDefault();seek(next)}
+};
+el('house').onchange=e=>pickBuilding(byId.get(e.target.value));
+el('floor').onchange=e=>{selected.floor=Number(e.target.value);initSelection()};
+el('entry').onchange=e=>{
+ const doors=addressesFor(selected.bid).filter(a=>a.entry===e.target.value);
+ const previous=addressOf(selected.bid,selected.unit).door;
+ selected.unit=(doors.find(a=>a.door===previous)||doors[0]).unit;initSelection();
+};
+el('unit').onchange=e=>{selected.unit=e.target.value;initSelection()};
+function resetView(){
+ orbit.reset(selected.scope);Object.assign(planCam,{x:0,y:0,zoom:1});
+ el('mapHint').textContent=selected.view==='iso'?'拖动旋转 · 滚轮缩放 · 右键或 Shift 拖动平移 · 触屏双指缩放和平移':'拖动平移 · 滚轮或双指缩放';
+ draw();
+}
+function changeZoom(factor,anchor){
+ const camera=selected.view==='iso'?orbit.camera:planCam,old=camera.zoom;
+ if(selected.view==='iso')orbit.zoom(factor);else planCam.zoom=Math.max(.1,Math.min(30,planCam.zoom*factor));
+ if(anchor){const correction=1-camera.zoom/old;panBy((anchor.x-c.clientWidth/2)*correction,(anchor.y-c.clientHeight/2)*correction)}
+}
+function zoomBy(factor,anchor){changeZoom(factor,anchor);requestDraw()}
+function panBy(dx,dy){
+ if(selected.view==='iso')orbit.pan(dx,dy);
+ else{const {s}=viewing(c.clientWidth,c.clientHeight);planCam.x-=dx/s;planCam.y+=dy/s}
+}
+for(const key of ['view','scope'])document.querySelectorAll('[data-'+key+']').forEach(b=>b.onclick=()=>{
+ selected[key]=b.dataset[key];toggleGroup('[data-'+key+']',key,selected[key]);resetView();
+});
+el('resetCam').onclick=resetView;el('zoomIn').onclick=()=>zoomBy(1.35);el('zoomOut').onclick=()=>zoomBy(1/1.35);
+el('homesTab').onclick=()=>{inspect('home');draw()};el('externalsTab').onclick=()=>{inspect('ext');draw()};
+el('external').onchange=e=>{exterior=e.target.value;inspect('ext');draw()};
+function focusBuilding(b){
+ if(!b)return;
+ if(selected.view!=='iso'){selected.view='iso';toggleGroup('[data-view]','view','iso');resetView()}
+ orbit.focus(b);draw();
+}
+el('focusHome').onclick=()=>focusBuilding(byId.get(selected.bid));el('focusExt').onclick=()=>focusBuilding(byId.get(exterior));
+function hitAt(x,y){
+ g.save();g.setTransform(1,0,0,1,0,0);let found=null;
+ for(let n=hitTests.length-1;n>=0;n--){const t=hitTests[n];if(t.path?g.isPointInPath(t.path,x,y):Math.hypot(x-t.x,y-t.y)<=t.r){found={b:byId.get(t.bid),unit:t.unit};break}}
+ g.restore();
+ if(!found&&selected.view==='iso'){const b=orbit.hit(x,y);if(b)found={b}}
+ return found;
+}
+const pointers=new Map();let gesture=null;
+const local=e=>{const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
+c.oncontextmenu=e=>e.preventDefault();
+c.onpointerdown=e=>{
+ if(e.button>2)return;
+ const pos=local(e);pointers.set(e.pointerId,pos);c.setPointerCapture(e.pointerId);
+ if(pointers.size===1)gesture={origin:pos,pan:e.button!==0||e.shiftKey,moved:false};
+ else gesture.moved=true;
+ el('hover').hidden=true;c.classList.add('dragging');
+};
+c.onpointermove=e=>{
+ const next=local(e),last=pointers.get(e.pointerId);
+ if(!last){
+   if(e.pointerType==='mouse'){
+     const target=hitAt(next.x,next.y),tooltip=el('hover');
+     tooltip.hidden=!target||target.b.group==='podium';
+     if(!tooltip.hidden){
+       const b=target.b;
+       tooltip.textContent=b.kind==='bridge'?b.name+' · 桥面 '+spanText(bridgeDecks(b).map(d=>d.top))+' m'+(b.estimated?'（估算）':''):b.name+' · 顶面 '+num(b.top)+' m';
+       tooltip.style.left=Math.max(2,Math.min(next.x+12,c.clientWidth-tooltip.offsetWidth-4))+'px';
+       tooltip.style.top=Math.max(2,Math.min(next.y+12,c.clientHeight-tooltip.offsetHeight-4))+'px';
+     }
+   }return;
+ }
+ const dx=next.x-last.x,dy=next.y-last.y;
+ if(pointers.size===1){
+   if(Math.hypot(next.x-gesture.origin.x,next.y-gesture.origin.y)>4)gesture.moved=true;
+   if(gesture.moved){
+     if(selected.view==='iso'&&!gesture.pan&&!e.shiftKey)orbit.orbit(dx,dy);else panBy(dx,dy);
+   }
+ }else if(pointers.size===2){
+   const other=[...pointers.entries()].find(([id])=>id!==e.pointerId)[1];
+   const before=Math.hypot(last.x-other.x,last.y-other.y),after=Math.hypot(next.x-other.x,next.y-other.y);
+   if(before>6&&after>6){
+     changeZoom(after/before,{x:(last.x+other.x)/2,y:(last.y+other.y)/2});
+     panBy(dx/2,dy/2);
+   }
+ }
+ pointers.set(e.pointerId,next);if(gesture.moved)requestDraw();
+};
+function finishPointer(e,cancelled){
+ if(!pointers.has(e.pointerId))return;
+ const pos=local(e);pointers.delete(e.pointerId);
+ if(!pointers.size){
+   if(!cancelled&&!gesture.moved&&e.button===0){const t=hitAt(pos.x,pos.y);if(t)pickBuilding(t.b,t.unit)}
+   gesture=null;c.classList.remove('dragging');requestDraw();
+ }
+}
+c.onpointerup=e=>finishPointer(e,false);c.onpointercancel=e=>finishPointer(e,true);
+c.onlostpointercapture=e=>finishPointer(e,true);c.onpointerleave=()=>{el('hover').hidden=true};
+c.addEventListener('wheel',e=>{e.preventDefault();const mult=e.deltaMode===1?16:e.deltaMode===2?c.clientHeight:1;zoomBy(Math.exp(Math.max(-1,Math.min(1,-e.deltaY*mult*.0015))),local(e))},{passive:false});
+c.onkeydown=e=>{
+ const d={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];
+ if(d){if(selected.view==='iso'&&!e.shiftKey)orbit.orbit(...d);else panBy(...d);draw()}
+ else if(['+','='].includes(e.key))zoomBy(1.25);else if(e.key==='-')zoomBy(.8);else if(e.key==='Home')resetView();else return;
+ e.preventDefault();
+};
+for(const day of dayList){const b=document.createElement('button');b.dataset.day=day;b.textContent=day;b.onclick=()=>{selected.day=day;selected.minute=sc.days[day].start;selected.frame=0;initSelection();restartClock()};el('dayTabs').append(b)}
+options(el('house'),homes,b=>b.id,b=>b.id);
+options(el('external'),externals,b=>b.id,b=>b.id+' · '+b.name);
+el('externalsTab').textContent=bridges.length?'周边楼与桥':'周边楼高 '+externals.length;
+if(bridges.length){
+  const link=el('bridgeLink');link.hidden=false;
+  link.onclick=()=>{
+    exterior=bridges[0].id;inspect('ext');
+    selected.scope='all';toggleGroup('[data-scope]','scope','all');
+    focusBuilding(bridges[0]);
+  };
+}
+el('mapHint').textContent='拖动旋转 · 滚轮缩放 · 右键或 Shift 拖动平移 · 触屏双指缩放和平移';
+new ResizeObserver(requestDraw).observe(c);document.addEventListener('visibilitychange',restartClock);
+initSelection();refreshPlayback();restartClock();
+</script></body></html>
