@@ -7,6 +7,7 @@
     "timezone": "UTC+08:00",
     "xy_units": "m EN",
     "coordinates_note": "局部米制楼位来自扫描公示图。太阳坐标按任务固定。",
+    "household_ranking_excluded_buildings": ["12号楼", "13号楼"],
     "sill_comparison_floor_height_m": 3.1,
     "unit_layout_scenarios": {
       "north_six": {

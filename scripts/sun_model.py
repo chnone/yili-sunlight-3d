@@ -14,6 +14,12 @@ DAYS = {"大寒": (1, 20, 8, 16), "冬至": (12, 21, 9, 15), "春分": (3, 21, 8
 
 
 def model_digest(model):
+    # The CSV fingerprint tracks ray inputs. Display-only ranking preferences
+    # may change without invalidating the saved sunlight intervals.
+    if "household_ranking_excluded_buildings" in model.get("site", {}):
+        site = model["site"].copy()
+        del site["household_ranking_excluded_buildings"]
+        model = {**model, "site": site}
     data = json.dumps(model, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(data).hexdigest()[:16]
 

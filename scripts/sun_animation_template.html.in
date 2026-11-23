@@ -29,6 +29,13 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 .door-fields{margin:8px 0 16px}.door-fields select:disabled{opacity:1;color:var(--ink);background:#f2f5f3}
 .day-results{grid-column:1 / -1}.day-results>details{margin:0;padding:12px 17px}
 #rankings{padding:17px;scroll-margin-top:12px}#rankings h2{font-size:17px}
+.rank-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#highlightFirst{flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;min-height:34px;color:#7d2049;background:#fff8fb;border:1px solid #cb9aaf;border-radius:5px;font-size:13px;font-weight:600}
+#highlightFirst[aria-pressed=true]{color:white;background:#8b174c;border-color:#8b174c}
+.leader-swatch{display:inline-block;width:14px;height:6px;border:1px solid #8b174c;background:#df397f;border-radius:2px}
+#highlightFirst[aria-pressed=true] .leader-swatch{border-color:#ffe1ef}
+#leaderLegend{border:0;background:transparent;color:#7d2049;font:inherit;padding:4px 0}#leaderLegend[hidden]{display:none}
+.rank-home.is-first{box-shadow:inset 3px 0 #df397f;padding-left:8px}.rank-home.is-first .rank-number{color:#8b174c;font-weight:650}
 #rankSummary{margin:8px 0 3px;font-size:14px;line-height:1.6;color:var(--ink)}#rankHomes,.rank-method{font-size:12px;line-height:1.6;color:var(--dim)}
 #rankList{list-style:none;padding:0;margin:12px 0 0;border-top:1px solid var(--line)}
 .rank-home{display:grid;grid-template-columns:3.7em minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;padding:9px 3px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);font-size:13px}
@@ -44,7 +51,7 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 <div class="map-head"><h2>楼群与阴影</h2><div class="mode"><div class="switch" role="group" aria-label="视角"><button data-view="iso" aria-pressed="true">三维</button><button data-view="plan" aria-pressed="false">俯视</button></div><div class="switch" role="group" aria-label="范围"><button data-scope="site" aria-pressed="true">地块</button><button data-scope="all" aria-pressed="false">含周边</button></div></div></div>
 <div class="mapbox"><canvas id="map" tabindex="0" aria-label="三维日照模型，可拖动和缩放。方向键旋转，按住 Shift 平移，加减号缩放，Home 复位" aria-describedby="mapHint"></canvas><span id="hover" hidden></span><div class="compass"><svg viewBox="0 0 16 26" aria-hidden="true"><g id="north"><path d="M8 2 L13 20 L8 17 L3 20 Z" fill="#34535f"/><path d="M8 2 L8 17 L3 20 Z" fill="#a9b7ba"/></g></svg>北</div><div class="maptools" aria-label="相机控制"><button id="zoomOut" aria-label="缩小">−</button><button id="zoomIn" aria-label="放大">＋</button><button id="resetCam">复位</button></div></div>
 <div id="mapHint" class="maphint"></div>
-<div class="mapinfo"><span class="legend"><i class="key model"></i>住宅</span><span class="legend"><i class="key hit"></i>当日遮挡窗台的周边楼</span><span class="legend"><i class="key ext"></i>其他周边楼</span><button hidden type="button" id="bridgeLink" class="legend bridge-link" title="在三维图中查看西侧立交桥及模型尺寸"><i class="key bridge" aria-hidden="true"></i>西侧立交桥</button><span class="legend"><i class="dot"></i>窗台见光</span><span class="legend"><i class="dot dark"></i>窗台受遮</span><span class="legend"><i class="shadow-swatch"></i>阴影</span><span id="planeNote" class="mapnote"></span></div>
+<div class="mapinfo"><span class="legend"><i class="key model"></i>住宅</span><span class="legend"><i class="key hit"></i>当日遮挡窗台的周边楼</span><span class="legend"><i class="key ext"></i>其他周边楼</span><button hidden type="button" id="bridgeLink" class="legend bridge-link" title="在三维图中查看西侧立交桥及模型尺寸"><i class="key bridge" aria-hidden="true"></i>西侧立交桥</button><span class="legend"><i class="dot"></i>窗台见光</span><span class="legend"><i class="dot dark"></i>窗台受遮</span><span class="legend"><i class="shadow-swatch"></i>阴影</span><button id="leaderLegend" type="button" class="legend" hidden aria-controls="map rankList"><i class="leader-swatch" aria-hidden="true"></i><span></span><b aria-hidden="true">×</b></button><span id="planeNote" class="mapnote"></span></div>
 <div class="transport"><div class="playline"><button id="play" class="play"></button><strong class="time" id="clock"></strong><span class="zone">北京时间</span><select id="speed" class="speed" aria-label="播放倍速"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></div><input id="scrub" class="slider" type="range" min="0" step="any" value="0" aria-label="日出至日落回放时间"><div class="ticks" id="ticks"></div></div>
 <div class="skyinfo"><span>太阳高度 <b id="alt"></b>　方位 <b id="az"></b></span><span id="sampleTime"></span></div>
 </section>
@@ -55,7 +62,7 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 </aside>
 <div class="panel day-results">
 <section id="rankings" aria-labelledby="rankTitle">
-<h2 id="rankTitle">全天日照最长的住户</h2><p id="rankSummary"></p><p id="rankHomes"></p>
+<div class="rank-heading"><h2 id="rankTitle">全天日照最长的住户</h2><button id="highlightFirst" type="button" aria-pressed="false" aria-controls="map rankList"><i class="leader-swatch" aria-hidden="true"></i><span>高亮第一名</span></button></div><p id="rankSummary"></p><p id="rankHomes"></p>
 <ol id="rankList" aria-label="住户日照排行"></ol>
 <button id="rankMore" type="button" aria-controls="rankList" aria-expanded="false" hidden></button>
 <p class="rank-method">从日出算到日落，按每户各南窗测点的平均直射时长排名。点击一户可在三维图中查看。</p>
@@ -162,13 +169,13 @@ function spanText(values){
   const low=num(Math.min(...values)),high=num(Math.max(...values));
   return low===high?String(low):low+'–'+high;
 }
-function pickBuilding(b,unit){
+function pickBuilding(b,unit,floor=selected.floor){
   if(b.group==='external'){exterior=b.id;inspect('ext');draw();return}
   if(!b.is_target)return;
   const prior=addressOf(selected.bid,selected.unit),addresses=addressesFor(b.id);
   const next=addresses.find(a=>a.unit===unit)||addresses.find(a=>a.entry===prior.entry&&a.door===prior.door)||
              addresses.find(a=>a.door===prior.door)||addresses[0];
-  inspect('home');Object.assign(selected,{bid:b.id,floor:Math.min(selected.floor,b.floors),unit:next.unit});
+  inspect('home');Object.assign(selected,{bid:b.id,floor:Math.min(floor,b.floors),unit:next.unit});
   initSelection();
 }
 function formatTime(minute,seconds=false){
@@ -218,6 +225,8 @@ function makeCards(){
  }));
 }
 let rankingDay=null,rankExpanded=false;
+let highlightLeaders=false;
+const leadersByDay=new Map(dayList.map(day=>[day,sc.days[day].household_leaders.rows.filter(row=>row.rank===1)]));
 function rankDuration(seconds){
  const minutes=Math.round(seconds/60),hours=Math.floor(minutes/60);
  return (hours?hours+' 小时 ':'')+(minutes%60)+' 分';
@@ -263,11 +272,20 @@ function describeHomes(rows){
  return descriptions.join('，');
 }
 function renderRanks(){
- const day=selected.day,{households,rows}=sc.days[day].household_leaders;
- const leaders=rows.filter(r=>r.rank===1);
+ const day=selected.day,{households,rows,excluded_buildings=[]}=sc.days[day].household_leaders;
+ const leaders=leadersByDay.get(day);
  const firstPhase=leaders.filter(r=>byId.get(r.bid).phase==='一期申报');
- el('rankSummary').textContent=day+'的 '+households+' 户中，'+leaders.length+' 户'+(leaders.length>1?'并列':'排名')+'第一，平均日照约 '+rankDuration(leaders[0].mean_seconds)+'。';
- el('rankHomes').textContent=firstPhase.length?'其中 '+firstPhase.length+' 户在一期申报楼栋，分别是 '+describeHomes(firstPhase)+'。':'日照最长的住户为 '+describeHomes(leaders)+'。';
+ const scope=excluded_buildings.length?'排除'+excluded_buildings.join('、')+'整栋后，':'';
+ const result=leaders.length?'，'+leaders.length+' 户'+(leaders.length>1?'并列':'排名')+'第一，平均日照约 '+rankDuration(leaders[0].mean_seconds)+'。':'。';
+ el('rankSummary').textContent=day+'，'+scope+'共 '+households+' 户参评'+result;
+ el('rankHomes').textContent=firstPhase.length?'其中 '+firstPhase.length+' 户在一期申报楼栋，分别是 '+describeHomes(firstPhase)+'。':leaders.length?'日照最长的住户为 '+describeHomes(leaders)+'。':'';
+ const toggle=el('highlightFirst'),legend=el('leaderLegend');
+ toggle.disabled=!leaders.length;
+ toggle.setAttribute('aria-pressed',String(highlightLeaders));
+ toggle.querySelector('span').textContent=highlightLeaders?'取消高亮':'高亮第一名';
+ legend.hidden=!highlightLeaders||!leaders.length;
+ legend.querySelector('span').textContent='参评第一名 · '+leaders.length+' 户';
+ legend.setAttribute('aria-label','取消'+day+'参评第一名 '+leaders.length+' 户的高亮');
 
  // Show a representative from each building at the same rank before repeating
  // a building. Expanding restores the original building/floor/household order.
@@ -287,6 +305,7 @@ function renderRanks(){
  el('rankList').replaceChildren(...visible.map(row=>{
    const item=document.createElement('li'),button=document.createElement('button');
    button.type='button';button.className='rank-home';
+   button.classList.toggle('is-first',highlightLeaders&&row.rank===1);
    const {entry,door}=addressOf(row.bid,row.unit);
    Object.assign(button.dataset,{bid:row.bid,floor:row.floor,unit:row.unit,entry,door});
    button.innerHTML='<span class="rank-number"></span><span><strong class="rank-address"></strong><small class="rank-phase"></small></span><span><strong class="rank-duration"></strong><small class="rank-probes"></small></span>';
@@ -309,6 +328,16 @@ function markRankSelection(){
  }
 }
 el('rankMore').onclick=()=>{rankExpanded=!rankExpanded;renderRanks()};
+function toggleLeaderHighlight(){
+ highlightLeaders=!highlightLeaders;
+ renderRanks();
+ if(!highlightLeaders){draw();return}
+ selected.view='iso';selected.scope='site';
+ toggleGroup('[data-view]','view','iso');toggleGroup('[data-scope]','scope','site');resetView();
+ document.querySelector('.map-head').scrollIntoView({block:'start'});c.focus({preventScroll:true});
+}
+el('highlightFirst').onclick=toggleLeaderHighlight;
+el('leaderLegend').onclick=()=>{toggleLeaderHighlight();c.focus({preventScroll:true})};
 el('rankList').onclick=e=>{
  const button=e.target.closest('button[data-bid]');if(!button)return;
  const {bid,floor,unit}=button.dataset;
@@ -410,7 +439,7 @@ function shadowPath(model,dir){
 // The browser composites these stationary surfaces. Copying all full-size layers
 // onto one viewport 60 times a second stalls software compositors on Retina displays.
 const layers=new Map();
-const layerOrder={ground:0,annotations:4};
+const layerOrder={ground:0,annotations:4,winners:5};
 function cachedLayer(id,key,paintLayer){
  let slot=layers.get(id);
  if(!slot){
@@ -429,6 +458,23 @@ function cachedLayer(id,key,paintLayer){
  slot.key=key;
 }
 let shadowCache={key:null},planHits=[],markerHits=[];
+const winnerGeometry=new Map();
+let winnerHits=[];
+function winnerMarkers(day){
+ if(winnerGeometry.has(day))return winnerGeometry.get(day);
+ const counts=new Map(),windows=[];
+ for(const {bid,floor,unit} of leadersByDay.get(day)){
+   counts.set(bid,(counts.get(bid)||0)+1);
+   const b=byId.get(bid),ids=pointByHome.get(bid).get(unit);
+   const sill=b.sill_base+(floor-1)*b.floor_height;
+   for(const ip of ids){
+     const p=allPts[ip],otherDistances=ids.filter(j=>j!==ip).map(j=>Math.hypot(p.x-allPts[j].x,p.y-allPts[j].y));
+     const halfWidth=Math.min(2.7,...otherDistances.map(d=>d*.37));
+     windows.push({bid,floor,unit,ip,marker:orbit.sillMarker(bid,p,sill,b.floor_height,halfWidth)});
+   }
+ }
+ const result={counts,windows};winnerGeometry.set(day,result);return result;
+}
 function draw(sky){
  const w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;const dpr=Math.min(selected.playing||c.classList.contains('dragging')?1:1.5,devicePixelRatio||1);
  if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr)}
@@ -437,7 +483,8 @@ function draw(sky){
  const ds=sc.days[selected.day],f=sky?.direction?sky:currentSky(ds),dir=f.direction,level=selected.floor,ref=iso?0:active.sill_base+(level-1)*active.floor_height;
  const cam=iso?orbit.camera:planCam;
  const cameraKey=[selected.view,selected.scope,devicePixelRatio,w,h,...Object.values(cam),...(iso?orbit.span:[])].join('|');
- const selectionKey=[cameraKey,selected.day,selected.bid,level,selected.unit,sideView,exterior].join('|');
+ const winners=highlightLeaders?winnerMarkers(selected.day):null;
+ const selectionKey=[cameraKey,selected.day,selected.bid,level,selected.unit,sideView,exterior,highlightLeaders].join('|');
  cachedLayer('ground',cameraKey,()=>{
  g.fillStyle='#e9eeea';g.fillRect(0,0,w,h);
  for(let x=Math.floor(allB[0]/25)*25;x<=allB[2]+80;x+=25)line(P(x,allB[1]-100),P(x,allB[3]+140),'#dae2df',.6);
@@ -505,12 +552,16 @@ function draw(sky){
      }
    }
    if(!mid)return;
-   const code=bridge?(b.name.length<=10?b.name:'立交桥'):b.is_target?String(parseInt(b.id))+'#':b.id.replace('外','');
+   const count=winners?.counts.get(b.id);
+   let code=bridge?(b.name.length<=10?b.name:'立交桥'):b.is_target?String(parseInt(b.id))+'#':b.id.replace('外','');
+   if(count)code+=' · '+count+'户';
    const font=Math.max(bridge?10:b.is_target?9:8,Math.min(13,s*3.4));
-   const hw=font*code.length*(bridge ? .5 : .31)+2,hh=font*.55;
+   g.font='600 '+font+'px "PingFang SC","Microsoft YaHei",sans-serif';
+   const hw=count?g.measureText(code).width/2+3:font*code.length*(bridge ? .5 : .31)+2,hh=font*.55;
    if(labelBoxes.some(([x,y,dx,dy])=>Math.abs(x-mid[0])<dx+hw && Math.abs(y-mid[1])<dy+hh))return;
    labelBoxes.push([mid[0],mid[1],hw,hh]);
-   textAt(code,mid[0],mid[1],font,bridge?'#343d61':active?'#fff':b.is_target?'#143f4b':'#473f34','center',true,bridge||!active);
+   if(count){g.fillStyle='#86254f';g.fillRect(mid[0]-hw,mid[1]-hh-1,2*hw,2*hh+2)}
+   textAt(code,mid[0],mid[1],font,count?'#fff':bridge?'#343d61':active?'#fff':b.is_target?'#143f4b':'#473f34','center',true,!count&&(bridge||!active));
  }
  function bodyColors(b){
    if(b.kind==='bridge')return sideView==='ext'&&b.id===exterior?['#555080','#383957']:['#646e89','#4c566d'];
@@ -554,7 +605,8 @@ function draw(sky){
      planHits.push({path,bid:b.id});
    }
    }else bodies.filter(body=>body.owner.kind==='bridge').forEach(drawBridgeAxis);
- const labels=[byId.get(selected.bid),...(sideView==='ext'?[byId.get(exterior)]:[]),...homes,...bridges,...externals];
+ const winnerBuildings=winners?[...winners.counts.keys()].map(id=>byId.get(id)):[];
+ const labels=[...winnerBuildings,byId.get(selected.bid),...(sideView==='ext'?[byId.get(exterior)]:[]),...homes,...bridges,...externals];
  [...new Set(labels.filter(Boolean))].forEach(labelBuilding);
  if(!iso){
    for (const [name,x,y,rot] of [['嘉江道',110,125,0],['沐江道',110,-12,0],['太湖路',230,54,-Math.PI/2],['墨江道',-6,54,-Math.PI/2]]){
@@ -571,6 +623,16 @@ function draw(sky){
  el('planeNote').textContent=iso?'三维楼群 · 米制等比例':'窗台高度水平面投影 · '+num(ref)+' m';
    markerHits=[];homes.forEach(pointsFor);hitTests=iso?markerHits:[...planHits,...markerHits];
  });
+ if(iso&&winners){
+   // Sun movement does not change which camera-facing wall pixels are visible.
+   cachedLayer('winners',[cameraKey,selected.day,orbit.pixelRatio].join('|'),()=>{
+     winnerHits=[];g.fillStyle='#df397f';
+     for(const entry of winners.windows){
+       const path=orbit.visibleMarkerPath(entry.marker);
+       if(path){g.fill(path);winnerHits.push({...entry,path})}
+     }
+   });
+ }else if(layers.has('winners'))layers.get('winners').canvas.hidden=true;
  const bearingDpr=Math.min(2,devicePixelRatio||1);
  if(bearing.width!==Math.round(72*bearingDpr)||bearing.height!==Math.round(64*bearingDpr)){
    bearing.width=Math.round(72*bearingDpr);bearing.height=Math.round(64*bearingDpr);
@@ -714,7 +776,11 @@ function focusBuilding(b){
 el('focusHome').onclick=()=>focusBuilding(byId.get(selected.bid));el('focusExt').onclick=()=>focusBuilding(byId.get(exterior));
 function hitAt(x,y){
  g.save();g.setTransform(1,0,0,1,0,0);let found=null;
- for(let n=hitTests.length-1;n>=0;n--){const t=hitTests[n];if(t.path?g.isPointInPath(t.path,x,y):Math.hypot(x-t.x,y-t.y)<=t.r){found={b:byId.get(t.bid),unit:t.unit};break}}
+ if(highlightLeaders&&selected.view==='iso'){
+   const winner=winnerHits.find(t=>g.isPointInPath(t.path,x,y));
+   if(winner)found={b:byId.get(winner.bid),unit:winner.unit,floor:winner.floor};
+ }
+ for(let n=hitTests.length-1;!found&&n>=0;n--){const t=hitTests[n];if(t.path?g.isPointInPath(t.path,x,y):Math.hypot(x-t.x,y-t.y)<=t.r){found={b:byId.get(t.bid),unit:t.unit};break}}
  g.restore();
  if(!found&&selected.view==='iso'){const b=orbit.hit(x,y);if(b)found={b}}
  return found;
@@ -737,7 +803,10 @@ c.onpointermove=e=>{
      tooltip.hidden=!target||target.b.group==='podium';
      if(!tooltip.hidden){
        const b=target.b;
-       tooltip.textContent=b.kind==='bridge'?b.name+' · 桥面 '+spanText(bridgeDecks(b).map(d=>d.top))+' m'+(b.estimated?'（估算）':''):b.name+' · 顶面 '+num(b.top)+' m';
+       if(target.floor){
+         const door=addressOf(b.id,target.unit);
+         tooltip.textContent=[b.name,target.floor+'层',door.entry,door.door,'日照第一'].filter(Boolean).join(' · ');
+       }else tooltip.textContent=b.kind==='bridge'?b.name+' · 桥面 '+spanText(bridgeDecks(b).map(d=>d.top))+' m'+(b.estimated?'（估算）':''):b.name+' · 顶面 '+num(b.top)+' m';
        tooltip.style.left=Math.max(2,Math.min(next.x+12,c.clientWidth-tooltip.offsetWidth-4))+'px';
        tooltip.style.top=Math.max(2,Math.min(next.y+12,c.clientHeight-tooltip.offsetHeight-4))+'px';
      }
@@ -763,7 +832,7 @@ function finishPointer(e,cancelled){
  if(!pointers.has(e.pointerId))return;
  const pos=local(e);pointers.delete(e.pointerId);
  if(!pointers.size){
-   if(!cancelled&&!gesture.moved&&e.button===0){const t=hitAt(pos.x,pos.y);if(t)pickBuilding(t.b,t.unit)}
+   if(!cancelled&&!gesture.moved&&e.button===0){const t=hitAt(pos.x,pos.y);if(t)pickBuilding(t.b,t.unit,t.floor)}
    gesture=null;c.classList.remove('dragging');requestDraw();
  }
 }

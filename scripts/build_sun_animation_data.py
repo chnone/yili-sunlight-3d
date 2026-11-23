@@ -103,10 +103,13 @@ def _daylight_bins(midnight, latitude, longitude):
     return [(a, b, a + (b-a)/2) for a, b in zip(times, times[1:])]
 
 
-def _household_leaders(keys, lit_seconds, limit=5):
+def _household_leaders(keys, lit_seconds, limit=5, *, excluded_buildings=()):
     """Return the top dwellings by mean full-day probe duration, including cutoff ties."""
     groups = {}
+    excluded = set(excluded_buildings)
     for (bid, floor, unit, label), seconds in zip(keys, lit_seconds, strict=True):
+        if bid in excluded:
+            continue
         groups.setdefault((bid, floor, unit), {})[label] = int(seconds)
     scores = {home: Fraction(sum(probes.values()), len(probes)) for home, probes in groups.items()}
     rows = []
@@ -121,7 +124,7 @@ def _household_leaders(keys, lit_seconds, limit=5):
         bid, floor, unit = home
         rows.append({"rank": rank, "bid": bid, "floor": floor, "unit": unit,
                      "probe_seconds": groups[home], "mean_seconds": float(score)})
-    return {"households": len(groups), "rows": rows}
+    return {"households": len(groups), "rows": rows, "excluded_buildings": list(excluded_buildings)}
 
 
 def build_scene(model, year, details_path):
@@ -158,6 +161,9 @@ def build_scene(model, year, details_path):
     mesh = Mesh.from_prisms(prisms(model))
     buildings = [_scene_building(b) for b in model["buildings"]]
     by_id = {b["id"]: b for b in buildings}
+    excluded = model["site"].get("household_ranking_excluded_buildings", [])
+    if not isinstance(excluded, list) or any(not isinstance(bid, str) or bid not in by_id for bid in excluded):
+        raise ValueError("排名排除名单须为模型中已知的楼号列表")
     # Renderer indices follow JSON order even if mesh construction order changes.
     display_index = {b["id"]: i for i, b in enumerate(buildings)}
     owner_index = np.array([display_index[bid] for bid in mesh.ids], dtype=np.int32)
@@ -217,7 +223,7 @@ def build_scene(model, year, details_path):
         day_data[day] = {"date": midnight.date().isoformat(), "start": frames[0]["start"],
                          "end": frames[-1]["end"], "standard_start": 60*begin, "standard_end": 60*end,
                          "solar_path": solar_path, "frames": frames, "blockers": blockers,
-                         "household_leaders": _household_leaders(keys, lit_seconds)}
+                         "household_leaders": _household_leaders(keys, lit_seconds, excluded_buildings=excluded)}
         for bid, seconds, standard_value in zip(mesh.ids, first_hit_seconds, standard_seconds):
             by_id[bid].setdefault("shadow_impact", {})[day] = round(int(seconds) / 60, 3)
             by_id[bid].setdefault("standard_shadow_impact", {})[day] = int(standard_value // 60)

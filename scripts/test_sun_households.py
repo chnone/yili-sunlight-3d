@@ -1,7 +1,7 @@
 import unittest
 from build_sun_animation_data import _household_leaders
 from sun_households import _combined_intervals, summarize_households
-from sun_model import facade_probes, household_addresses
+from sun_model import facade_probes, household_addresses, model_digest
 
 
 def example_row(label, intervals, minutes, unit="东户"):
@@ -15,6 +15,22 @@ def example_row(label, intervals, minutes, unit="东户"):
 
 
 class HouseholdTimes(unittest.TestCase):
+    def test_whole_buildings_are_removed_before_assigning_ranks(self):
+        keys = [(bid, floor, "东户", "A") for bid, floor in
+                [("12号楼", 1), ("13号楼", 18), ("9号楼", 11), ("10号楼", 1)]]
+        excluded = ["12号楼", "13号楼"]
+        result = _household_leaders(keys, [99, 98, 70, 70], limit=1, excluded_buildings=excluded)
+        self.assertEqual(result["households"], 2)
+        self.assertEqual(result["excluded_buildings"], excluded)
+        self.assertEqual([(row["bid"], row["rank"]) for row in result["rows"]],
+                         [("9号楼", 1), ("10号楼", 1)])
+
+    def test_ranking_scope_keeps_the_existing_sunlight_csv_valid(self):
+        base = {"site": {"year": 2026}, "buildings": []}
+        scoped = {**base, "site": {**base["site"], "household_ranking_excluded_buildings": ["12号楼"]}}
+        self.assertEqual(model_digest(base), model_digest(scoped))
+        self.assertNotEqual(model_digest({**base, "buildings": [{"id": "12号楼"}]}), model_digest(scoped))
+
     def test_full_day_rank_keeps_cutoff_ties_and_weights_each_probe_equally(self):
         keys, seconds = [], []
         for floor, durations in enumerate(((81, 80), (80, 40), (60, 40, 80), (59, 60)), 1):

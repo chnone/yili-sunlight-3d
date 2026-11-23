@@ -11,6 +11,7 @@ class SunOrbit {
     this.faces = [];
     this.edges = [];
     this.vertices = [];
+    this.residentialWalls = new Map();
     for (const [owner, b] of this.owners.entries()) {
       for (const solid of [b, ...(b.parts || [])]) this.extrude(solid, owner);
     }
@@ -64,6 +65,10 @@ class SunOrbit {
     for(let i=0;i<count;i++) {
       const j=(i+1)%count, dx=p[j][0]-p[i][0], dy=p[j][1]-p[i][1], len=Math.hypot(dx,dy);
       const normal=[dy/len,-dx/len,0];
+      if(solid===this.owners[owner] && solid.is_target){
+        if(!this.residentialWalls.has(solid.id))this.residentialWalls.set(solid.id,[]);
+        this.residentialWalls.get(solid.id).push({x:p[i][0],y:p[i][1],tx:dx/len,ty:dy/len,len,face:this.faces.length});
+      }
       add(i,j,j+count,normal,false);add(i,j+count,i+count,normal,false);
       edge(i+count,j+count);edge(i,i+count);
     }
@@ -333,6 +338,46 @@ class SunOrbit {
     const px=Math.floor(x*this.pixelRatio),py=Math.floor(y*this.pixelRatio);
     if(px<0||px>=this.layer.width||py<0||py>=this.layer.height)return null;
     return this.owners[this.ids[px+py*this.layer.width]]||null;
+  }
+
+  // Anchor a rank marker to the actual wall immediately inside a sill probe.
+  // The strip is a locator symbol. Its width is limited by the wall corners.
+  sillMarker(bid, point, sill, floorHeight, halfWidth) {
+    let best=null,nearest=Infinity;
+    for(const wall of this.residentialWalls.get(bid)){
+      const u=Math.max(0,Math.min(wall.len,(point.x-wall.x)*wall.tx+(point.y-wall.y)*wall.ty));
+      const dx=wall.x+u*wall.tx-point.x,dy=wall.y+u*wall.ty-point.y;
+      const dist=dx*dx+dy*dy;
+      if(dist<nearest){nearest=dist;best={wall,u}}
+    }
+    const {wall,u}=best;
+    const ends=[Math.max(0,u-halfWidth),Math.min(wall.len,u+halfWidth)];
+    return {ends:ends.map(t=>[wall.x+t*wall.tx,wall.y+t*wall.ty,sill]),height:floorHeight*.48,face:wall.face};
+  }
+
+  visibleMarkerPath(marker) {
+    const {P}=this.view,ratio=this.pixelRatio,w=this.layer.width,h=this.layer.height;
+    const [left,right]=marker.ends.map(p=>P(...p)).sort((a,b)=>a[0]-b[0]);
+    const width=right[0]-left[0];
+    if(width<.01)return null;
+    const rise=marker.height*this.view.s*this.view.axes.up[2];
+    const x0=Math.max(0,Math.ceil(left[0]*ratio-.5)),x1=Math.min(w,Math.ceil(right[0]*ratio-.5));
+    let path=null;
+    for(let x=x0;x<x1;x++){
+      const t=((x+.5)/ratio-left[0])/width,bottom=left[1]+t*(right[1]-left[1]);
+      const y0=Math.max(0,Math.ceil((bottom-rise)*ratio-.5)),y1=Math.min(h,Math.ceil(bottom*ratio-.5));
+      let start=-1;
+      for(let y=y0;y<=y1;y++){
+        const face=y<y1?this.faceMap[y*w+x]:-1;
+        if(face===marker.face||face===marker.face+1){if(start===-1)start=y}
+        else if(start!==-1){
+          if(!path)path=new Path2D();
+          path.rect(x/ratio,start/ratio,1/ratio,(y-start)/ratio);
+          start=-1;
+        }
+      }
+    }
+    return path;
   }
   visible(x,y,z,owner) {
     const pos=this.view.P(x,y,z),px=Math.floor(pos[0]*this.pixelRatio),py=Math.floor(pos[1]*this.pixelRatio);
