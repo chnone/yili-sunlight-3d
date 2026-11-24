@@ -106,6 +106,7 @@ def save_table(results, path):
 
 def main():
     from sun_daylight_chart import plot_daylight_heatmap
+    from sun_plot_style import bridge_height_note
 
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("--model", type=Path, default=MODEL)
@@ -122,7 +123,8 @@ def main():
     for name, filename in DAYS_TO_PLOT.items():
         day = scene["days"][name]
         plot_daylight_heatmap(name, day["date"], round(day["start"]*60), round(day["end"]*60),
-                              buildings, list(results[name].values()), args.charts_dir / filename)
+                              buildings, list(results[name].values()), args.charts_dir / filename,
+                              bridge_note=bridge_height_note(model))
     save_table(results, args.table)
 
 

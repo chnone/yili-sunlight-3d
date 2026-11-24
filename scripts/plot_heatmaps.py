@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 from sun_model import CHARTS, DAYS, MODEL, OUTPUT, household_addresses, model_digest, read_model, receivers, targets
-from sun_plot_style import MUTED, plt, save, setup
+from sun_plot_style import MUTED, bridge_height_note, plt, save, setup
 from sun_households import assign_addresses, summarize_households
 from sun_layout_variant import select_layout
 from matplotlib import colors, patches
@@ -87,6 +87,7 @@ def heatmap(model, groups, day, file, year):
     fig.suptitle(f"{day}  |  各层各户南向日照", x=.06,y=.968,ha="left",fontsize=23)
     fig.text(.06,.902,f"{year} 年 {month} 月 {dom} 日　·　北京时间 {begin:02}:00–{end:02}:00"
              "　·　每格一户，A / B 等逐行列出各点小时数，底色按本户较弱点",fontsize=12,color=MUTED)
+    fig.text(.06,.862,bridge_height_note(model),fontsize=10,color=MUTED)
     ax = fig.add_axes([.058,.18,.925,.60])
     ax.set_facecolor("#f0f3f2")
     im = ax.imshow(data,origin="lower",aspect="auto",interpolation="none",cmap=palette,norm=norm)

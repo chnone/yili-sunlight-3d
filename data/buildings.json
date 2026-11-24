@@ -7,7 +7,10 @@
     "timezone": "UTC+08:00",
     "xy_units": "m EN",
     "coordinates_note": "局部米制楼位来自扫描公示图。太阳坐标按任务固定。",
-    "household_ranking_excluded_buildings": ["12号楼", "13号楼"],
+    "household_ranking_excluded_buildings": [
+      "12号楼",
+      "13号楼"
+    ],
     "sill_comparison_floor_height_m": 3.1,
     "unit_layout_scenarios": {
       "north_six": {
@@ -7444,8 +7447,8 @@
           180.477
         ]
       ],
-      "base_height": 7.4,
-      "roof_height": 9.0,
+      "base_height": 10.4,
+      "roof_height": 12.0,
       "estimated": true,
       "parts": [
         {
@@ -7493,8 +7496,8 @@
               181.71
             ]
           ],
-          "base_height": 7.4,
-          "top_height": 9.0
+          "base_height": 10.4,
+          "top_height": 12.0
         },
         {
           "kind": "deck",
@@ -7637,7 +7640,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7660,7 +7663,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7683,7 +7686,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7706,7 +7709,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7729,7 +7732,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7752,7 +7755,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7775,7 +7778,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7798,7 +7801,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7821,7 +7824,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7844,7 +7847,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7867,7 +7870,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7890,7 +7893,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7913,7 +7916,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7936,7 +7939,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7959,7 +7962,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -7982,7 +7985,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8005,7 +8008,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8028,7 +8031,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8051,7 +8054,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8074,7 +8077,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8097,7 +8100,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8120,7 +8123,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8143,7 +8146,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8166,7 +8169,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8189,7 +8192,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8212,7 +8215,7 @@
             ]
           ],
           "base_height": 0,
-          "top_height": 7.4
+          "top_height": 10.4
         },
         {
           "kind": "pier",
@@ -8815,14 +8818,22 @@
       ],
       "status": "已建桥段，竖向及墩位为估算",
       "polygon_basis": "OpenStreetMap 四条已标 bridge=yes 的道路中心线；按公示图约束解放南路主线轴位，参考 2025 年影像。截取一里以西约 425 m 长的临盘段，北侧黑牛城道互通及其余远端未展开。",
-      "height_basis": "主桥桥面按离地 9.0 m、梁底 7.4 m；两侧匝道桥面按 7.0 m、梁底 5.8 m。以上均为估算。各幅按水平板近似，桥墩按约 32 m 的示意间距布置。未取得竣工纵断面和墩位测量。",
+      "height_basis": "两期卫星影像的局部视差用附近两处屋顶定标，主桥桥面离桥旁地面的中心估算约为 11 m 和 12 m。日照模型双向主桥统一采用 12 m；沿用 1.6 m 的估计梁厚，梁底为 10.4 m。两侧匝道暂取桥面 7 m、梁底 5.8 m。均为估算，主桥影像误差仍容许原假设 9 m。桥梁和住宅地坪暂用同一高程基准；各幅仍按水平板近似，桥墩按约 32 m 间距示意。",
       "height_review": {
-        "status": "线位核对 · 桥高估算",
-        "summary": "主桥桥面按离地 9.0 m、梁底 7.4 m；两侧匝道桥面按 7.0 m、梁底 5.8 m。以上均为估算。各幅按水平板近似，桥墩按约 32 m 的示意间距布置。未取得竣工纵断面和墩位测量。 临地块最近的是东侧匝道，靠地块一边另有墨江道和地面道路。",
+        "status": "主桥影像估高 · 匝道待测",
+        "summary": "两期卫星影像的局部视差用附近两处屋顶定标，主桥桥面离桥旁地面的中心估算约为 11 m 和 12 m。日照模型双向主桥统一采用 12 m；沿用 1.6 m 的估计梁厚，梁底为 10.4 m。两侧匝道暂取桥面 7 m、梁底 5.8 m。均为估算，主桥影像误差仍容许原假设 9 m。桥梁和住宅地坪暂用同一高程基准；各幅仍按水平板近似，桥墩按约 32 m 间距示意。 东侧匝道最靠近地块。",
         "reviewed_on": "2026-11-24",
-        "source_label": "天津市规划和自然资源局对解放南路右侧匝道桥、地面辅路与墨江道的答复",
-        "url": "https://ghhzrzy.tj.gov.cn/zwgk_143/jyta/rdjybljggk/202506/t20250604_6947161.html",
+        "source_label": "2021 年 10 月 11 日实拍 · WorldView-2 影像（Esri Wayback）",
+        "url": "https://www.arcgis.com/home/item.html?id=daf056c20b504f848109f09ca6b4ae94",
         "references": [
+          {
+            "title": "2021 年 10 月 11 日实拍 · WorldView-2 影像（Esri Wayback）",
+            "url": "https://www.arcgis.com/home/item.html?id=daf056c20b504f848109f09ca6b4ae94"
+          },
+          {
+            "title": "2021 年 12 月 21 日实拍 · WorldView-2 影像（Esri Wayback）",
+            "url": "https://www.arcgis.com/home/item.html?id=5b7cef1b0dcc42698c1f52fb415f202c"
+          },
           {
             "title": "天津市规划和自然资源局对解放南路右侧匝道桥、地面辅路与墨江道的答复",
             "url": "https://ghhzrzy.tj.gov.cn/zwgk_143/jyta/rdjybljggk/202506/t20250604_6947161.html"
@@ -8944,6 +8955,14 @@
       "date": "2026-11-24",
       "sources": [
         {
+          "title": "2021 年 10 月 11 日实拍 · WorldView-2 影像（Esri Wayback）",
+          "url": "https://www.arcgis.com/home/item.html?id=daf056c20b504f848109f09ca6b4ae94"
+        },
+        {
+          "title": "2021 年 12 月 21 日实拍 · WorldView-2 影像（Esri Wayback）",
+          "url": "https://www.arcgis.com/home/item.html?id=5b7cef1b0dcc42698c1f52fb415f202c"
+        },
+        {
           "title": "天津市规划和自然资源局对解放南路右侧匝道桥、地面辅路与墨江道的答复",
           "url": "https://ghhzrzy.tj.gov.cn/zwgk_143/jyta/rdjybljggk/202506/t20250604_6947161.html"
         },
@@ -8999,7 +9018,7 @@
         "basis": "公示图解放南路中线（约 520 px），与地块西界墨江道分开。外部影像产品平面标称精度约 8.47 m；配准后局部误差待核。"
       },
       "coverage": "南端按局部 y=-245 m 裁切，北端分别取四条临盘 OSM 桥段的制图端点。模型截面不代表实际桥头或匝道起终点。北侧互通和远端未展开。",
-      "vertical_assumption": "主桥桥面按离地 9.0 m、梁底 7.4 m；两侧匝道桥面按 7.0 m、梁底 5.8 m。以上均为估算。各幅按水平板近似，桥墩按约 32 m 的示意间距布置。未取得竣工纵断面和墩位测量。",
+      "vertical_assumption": "两期卫星影像的局部视差用附近两处屋顶定标，主桥桥面离桥旁地面的中心估算约为 11 m 和 12 m。日照模型双向主桥统一采用 12 m；沿用 1.6 m 的估计梁厚，梁底为 10.4 m。两侧匝道暂取桥面 7 m、梁底 5.8 m。均为估算，主桥影像误差仍容许原假设 9 m。桥梁和住宅地坪暂用同一高程基准；各幅仍按水平板近似，桥墩按约 32 m 间距示意。",
       "sections": [
         {
           "osm_way": "101951724",
@@ -9015,8 +9034,8 @@
             ]
           ],
           "width_m_estimated": 13.4,
-          "deck_bottom_m_estimated": 7.4,
-          "deck_top_m_estimated": 9.0
+          "deck_bottom_m_estimated": 10.4,
+          "deck_top_m_estimated": 12.0
         },
         {
           "osm_way": "101698510",
@@ -9036,8 +9055,8 @@
             ]
           ],
           "width_m_estimated": 13.4,
-          "deck_bottom_m_estimated": 7.4,
-          "deck_top_m_estimated": 9.0
+          "deck_bottom_m_estimated": 10.4,
+          "deck_top_m_estimated": 12.0
         },
         {
           "osm_way": "101952614",

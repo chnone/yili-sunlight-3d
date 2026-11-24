@@ -22,7 +22,7 @@ def _clock(seconds):
     return f"{hours:02}:{minutes:02}:{seconds:02}"
 
 
-def plot_daylight_heatmap(day, date, start_seconds, end_seconds, buildings, rows, path):
+def plot_daylight_heatmap(day, date, start_seconds, end_seconds, buildings, rows, path, *, bridge_note=""):
     setup()
     homes = defaultdict(list)
     for row in rows:
@@ -52,6 +52,8 @@ def plot_daylight_heatmap(day, date, start_seconds, end_seconds, buildings, rows
     cell_width, cell_height = 1.07, .42 + .13 * (point_lines - 1)
     floor_margin, gap = .33, .20
     left, right, header, band_header, band_gap, footer = .45, .45, 1.40, .73, .26, .47
+    if bridge_note:
+        header += .28
     figure_width = left + right + max(
         sum(len(widths[b["id"]]) * cell_width + floor_margin for b in group) + gap * (len(group) - 1)
         for group in bands)
@@ -70,6 +72,8 @@ def plot_daylight_heatmap(day, date, start_seconds, end_seconds, buildings, rows
           fontsize=10)
     label(left, 1.18, "小字为动画窗台卡 A、B 点各自的全天直射（分钟），按 5 分钟采样。",
           fontsize=10)
+    if bridge_note:
+        label(left, 1.46, bridge_note, fontsize=10, color=MUTED)
     bar_width = 3.05
     bar_left = figure_width - right - bar_width
     label(bar_left, .85, "户均直射时长（小时）", fontsize=9, color=MUTED)

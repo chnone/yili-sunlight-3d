@@ -11,6 +11,27 @@ from matplotlib import font_manager, pyplot as plt
 INK, MUTED = "#182f3a", "#425c67"
 
 
+def bridge_height_note(model):
+    """Describe the deck heights used in the rays, relative to the bridge's local grade."""
+    bridge = next((b for b in model["buildings"] if b["id"] == "桥W01"), None)
+    if not bridge:
+        return ""
+    decks = {bridge.get("name", "主桥"): bridge["roof_height"]}
+    decks.update((part["name"], part["top_height"]) for part in bridge.get("parts", [])
+                 if part.get("kind") == "deck" and part.get("name"))
+    main = [height for name, height in decks.items() if "主桥" in name]
+    labels = []
+    if main:
+        span = f"{min(main):g}–{max(main):g}" if min(main) != max(main) else f"{main[0]:g}"
+        labels.append(f"主桥 {span} 米")
+    if "东侧匝道" in decks:
+        labels.append(f"东侧匝道 {decks['东侧匝道']:g} 米")
+    qualifier = "估算" if bridge.get("estimated") else "模型"
+    if not labels:
+        return ""
+    return f"郁江桥桥面离地高度（{qualifier}）　" + "，".join(labels)
+
+
 def setup():
     options = [
         os.environ.get("SUNLIGHT_FONT"), "/System/Library/Fonts/STHeiti Medium.ttc",
