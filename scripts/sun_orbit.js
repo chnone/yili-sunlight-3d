@@ -6,16 +6,19 @@ class SunOrbit {
     this.canvas = canvas;
     this.layer = document.createElement('canvas');
     this.ctx = this.layer.getContext('2d');
+    this.vectorClip = typeof CSS!=='undefined' && CSS.supports('clip-path','path("M0 0L1 1Z")');
     this.owners = scene.buildings;
     this.index = new Map(this.owners.map((b, i) => [b.id, i]));
     this.faces = [];
     this.edges = [];
+    this.shells = [];
     this.vertices = [];
     this.shadingEpoch = 0;
     this.residentialWalls = new Map();
     for (const [owner, b] of this.owners.entries()) {
       for (const solid of [b, ...(b.parts || [])]) this.extrude(solid, owner);
     }
+    this.shadowGrid=SunOrbit.shadowGrid(this.vertices,this.owners.filter(b=>b.is_target));
     this.camera = {yaw: 0, elevation: 0, zoom: 1, x: 0, y: 0, z: 0};
     this.reset(initialScope);
   }
@@ -57,6 +60,8 @@ class SunOrbit {
     const start=this.vertices.length, count=p.length;
     const base=p.map(([x,y])=>[x,y,solid.base]), roof=p.map(([x,y])=>[x,y,solid.top]);
     this.vertices.push(...base,...roof);
+    const sides=[];
+    this.shells.push({start,count,sides});
     const add=(i,j,k,normal,roof)=>this.faces.push({ids:[start+i,start+j,start+k],owner,normal,roof});
     const edge=(i,j)=>this.edges.push([start+i,start+j,owner]);
     for(const [a,b,c] of triangles) {
@@ -66,6 +71,7 @@ class SunOrbit {
     for(let i=0;i<count;i++) {
       const j=(i+1)%count, dx=p[j][0]-p[i][0], dy=p[j][1]-p[i][1], len=Math.hypot(dx,dy);
       const normal=[dy/len,-dx/len,0];
+      sides.push(normal);
       if(solid===this.owners[owner] && solid.is_target){
         if(!this.residentialWalls.has(solid.id))this.residentialWalls.set(solid.id,[]);
         this.residentialWalls.get(solid.id).push({x:p[i][0],y:p[i][1],tx:dx/len,ty:dy/len,len,face:this.faces.length});
@@ -89,6 +95,23 @@ class SunOrbit {
 
   static extentPoints(owners) {
     return owners.flatMap(b=>[b,...(b.parts||[])].flatMap(s=>s.polygon.flatMap(([x,y])=>[[x,y,s.base],[x,y,s.top]])));
+  }
+
+  static shadowGrid(vertices,targets) {
+    const centerOf=points=>{
+      const low=[Infinity,Infinity,Infinity],high=[-Infinity,-Infinity,-Infinity];
+      for(const point of points)for(let i=0;i<3;i++){
+        low[i]=Math.min(low[i],point[i]);high[i]=Math.max(high[i],point[i]);
+      }
+      return low.map((v,i)=>(v+high[i])/2);
+    };
+    const center=centerOf(vertices),size=1152;
+    let radius=.5;
+    for(const [x,y,z] of vertices)radius=Math.max(radius,Math.hypot(x-center[0],y-center[1],z-center[2]));
+    // Every orientation fits the same texel scale. Anchor its phase near the
+    // residential facades so remote towers cannot shift the local grid.
+    const anchor=targets.length?centerOf(SunOrbit.extentPoints(targets)):center;
+    return {anchor,size,scale:(size-5)/(2*radius)};
   }
 
   fit(coords, detail=false) {
@@ -177,15 +200,15 @@ class SunOrbit {
     if(prior&&prior.every((value,i)=>value===dir[i]))return this.light;
     const horiz=Math.hypot(dir[0],dir[1]), r=[dir[1]/horiz,-dir[0]/horiz,0],u=[-r[1]*dir[2],r[0]*dir[2],r[1]*dir[0]-r[0]*dir[1]];
     const positions=this.light?.positions || this.vertices.map(()=>[0,0,0]);
-    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    let minX=Infinity,minY=Infinity;
     for(let i=0;i<positions.length;i++){
       const point=this.vertices[i],pos=positions[i];
       pos[0]=SunOrbit.dot(point,r);pos[1]=SunOrbit.dot(point,u);pos[2]=SunOrbit.dot(point,dir);
-      minX=Math.min(minX,pos[0]);maxX=Math.max(maxX,pos[0]);
-      minY=Math.min(minY,pos[1]);maxY=Math.max(maxY,pos[1]);
+      minX=Math.min(minX,pos[0]);minY=Math.min(minY,pos[1]);
     }
-    const size=1152,scale=(size-5)/Math.max(maxX-minX,maxY-minY);
-    for(const pos of positions){pos[0]=2+(pos[0]-minX)*scale;pos[1]=2+(pos[1]-minY)*scale;}
+    const {anchor,size,scale}=this.shadowGrid,ox=SunOrbit.dot(anchor,r),oy=SunOrbit.dot(anchor,u);
+    const left=Math.floor((minX-ox)*scale)-2,top=Math.floor((minY-oy)*scale)-2;
+    for(const pos of positions){pos[0]=(pos[0]-ox)*scale-left;pos[1]=(pos[1]-oy)*scale-top;}
     const depth=this.light?.depth || new Float32Array(size*size);
     depth.fill(-Infinity);
     for(const face of this.faces){
@@ -218,37 +241,36 @@ class SunOrbit {
          Math.max(a[1],b[1],c[1])<0 || Math.min(a[1],b[1],c[1])>=h)continue;
       SunOrbit.raster(coords,face.ids,w,h,this.z,faceMap,i,gradients);
     }
-    // Encode visible silhouette and roof edges separately. Keep edge ownership
-    // identical to the solid behind it, including near closely stacked roofs.
-    const err=1.15/(ratio*view.s);
-    for(const [a,b,owner] of this.edges) {
-      const p=coords[a],q=coords[b],dx=q[0]-p[0],dy=q[1]-p[1],dz=q[2]-p[2];
-      if(Math.max(p[0],q[0])<0||Math.min(p[0],q[0])>=w||
-         Math.max(p[1],q[1])<0||Math.min(p[1],q[1])>=h)continue;
-      const steps=Math.ceil(Math.max(Math.abs(dx),Math.abs(dy)));if(!steps)continue;
-      for(let i=0;i<=steps;i++){
-        const t=i/steps, x=Math.floor(p[0]+dx*t),y=Math.floor(p[1]+dy*t);
-        if(x<0||x>=w||y<0||y>=h)continue;
-        const k=y*w+x,f=faceMap[k];
-        if(f>=0 && faces[f].owner===owner && this.z[k]<=p[2]+dz*t+err)faceMap[k]=-2-owner;
-      }
-    }
+    if(this.canvas)this.projectOutlines(view,coords,w,h);
     // Each row is divided into consecutive pixels of the same face. During
     // playback these spans need no per-pixel triangle/depth/visibility tests.
-    this.spans=faces.map(()=>[]);this.edgeSpans=this.owners.map(()=>[]);
+    this.spans=faces.map(()=>[]);
+    this.rim=[];
     for(let y=0;y<h;y++){
       const row=y*w,end=row+w;
       for(let left=row;left<end;){
         const f=faceMap[left];let right=left+1;
         while(right<end&&faceMap[right]===f)right++;
         if(f!==-1){
-          const owner=f<0?-2-f:faces[f].owner;
-          this.ids.fill(owner,left,right);
-          if(f<0)this.edgeSpans[owner].push(left,right);
-          else{
-            const {ux,uy,vx,vy}=gradients[f],a=coords[faces[f].ids[0]];
-            const dx=left-row+.5-a[0],dy=y+.5-a[1];
-            this.spans[f].push(left,right,dx*ux+dy*uy,dx*vx+dy*vy);
+          this.ids.fill(faces[f].owner,left,right);
+          const {ux,uy,vx,vy}=gradients[f],a=coords[faces[f].ids[0]];
+          const dx=left-row+.5-a[0],dy=y+.5-a[1];
+          this.spans[f].push(left,right,dx*ux+dy*uy,dx*vx+dy*vy);
+        }else if(this.vectorClip){
+          // Give the compositor colour on both sides of the exact silhouette.
+          // Only these transparent neighbours need updating when the sun moves.
+          for(let k=left;k<right;k++){
+            const previous=k>row,next=k<end-1;
+            let source=-1;
+            if(previous && faceMap[k-1]>=0)source=k-1;
+            else if(next && faceMap[k+1]>=0)source=k+1;
+            else if(y>0 && faceMap[k-w]>=0)source=k-w;
+            else if(y<h-1 && faceMap[k+w]>=0)source=k+w;
+            else if(previous && y>0 && faceMap[k-w-1]>=0)source=k-w-1;
+            else if(next && y>0 && faceMap[k-w+1]>=0)source=k-w+1;
+            else if(previous && y<h-1 && faceMap[k+w-1]>=0)source=k+w-1;
+            else if(next && y<h-1 && faceMap[k+w+1]>=0)source=k+w+1;
+            if(source>=0)this.rim.push(k,source);
           }
         }
         left=right;
@@ -257,10 +279,87 @@ class SunOrbit {
     this.gradients=gradients;
   }
 
+  projectOutlines(view,coords,w,h) {
+    // The exterior of an extrusion follows its lower edge on a front-facing
+    // wall and its roof edge on a back-facing wall. All contours have the
+    // same winding, so their union also handles concavities and overlaps.
+    const ratio=this.pixelRatio,commands=[];
+    for(const {start,count,sides} of this.shells){
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      for(let k=start;k<start+2*count;k++){
+        const [x,y]=coords[k];
+        minX=Math.min(minX,x);maxX=Math.max(maxX,x);
+        minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+      }
+      if(maxX<0||minX>w||maxY<0||minY>h)continue;
+      let previous=-1;
+      for(let i=0;i<count;i++){
+        const high=SunOrbit.dot(sides[i],view.axes.toward)>0?0:count;
+        if(previous!==high || i===0){
+          const p=coords[start+high+i];
+          commands.push((i===0?'M':'L')+(p[0]/ratio).toFixed(2)+' '+(p[1]/ratio).toFixed(2));
+        }
+        const q=coords[start+high+(i+1)%count];
+        commands.push('L'+(q[0]/ratio).toFixed(2)+' '+(q[1]/ratio).toFixed(2));
+        previous=high;
+      }
+      commands.push('Z');
+    }
+    this.silhouette=commands.join('');
+    if(this.vectorClip)this.layer.style.clipPath=this.silhouette?'path("'+this.silhouette+'")':'inset(50%)';
+    const error=1.3/(ratio*view.s),faceMap=this.faceMap,faces=this.faces;
+    this.outlines=Array.from({length:this.owners.length},()=>new Path2D());
+    for(const [a,b,owner] of this.edges){
+      const p=coords[a],q=coords[b],dx=q[0]-p[0],dy=q[1]-p[1],dz=q[2]-p[2];
+      if(Math.max(p[0],q[0])<0||Math.min(p[0],q[0])>=w||
+         Math.max(p[1],q[1])<0||Math.min(p[1],q[1])>=h)continue;
+      let start=0,end=1;
+      if(dx){
+        const left=-p[0]/dx,right=(w-p[0])/dx;
+        start=Math.max(start,Math.min(left,right));end=Math.min(end,Math.max(left,right));
+      }
+      if(dy){
+        const top=-p[1]/dy,bottom=(h-p[1])/dy;
+        start=Math.max(start,Math.min(top,bottom));end=Math.min(end,Math.max(top,bottom));
+      }
+      if(start>=end)continue;
+      const steps=Math.max(1,Math.ceil((end-start)*Math.max(Math.abs(dx),Math.abs(dy))));
+      const step=(end-start)/steps;
+      const path=this.outlines[owner];let priorVisible=false;
+      for(let i=0;i<=steps;i++){
+        const t=start+i*step,x=p[0]+t*dx,y=p[1]+t*dy,z=p[2]+t*dz;
+        const left=Math.floor(x-.5),top=Math.floor(y-.5);
+        let visible=false;
+        for(let iy=Math.max(0,top);iy<=Math.min(h-1,top+1)&&!visible;iy++){
+          for(let ix=Math.max(0,left);ix<=Math.min(w-1,left+1);ix++){
+            const k=iy*w+ix,f=faceMap[k];
+            if(f>=0 && faces[f].owner===owner && this.z[k]<=z+error){visible=true;break}
+          }
+        }
+        if(visible!==priorVisible){
+          const edgeT=i===0?start:t-step/2,ex=(p[0]+dx*edgeT)/ratio,ey=(p[1]+dy*edgeT)/ratio;
+          if(visible)path.moveTo(ex,ey);else path.lineTo(ex,ey);
+        }
+        if(i===steps && visible)path.lineTo(x/ratio,y/ratio);
+        priorVisible=visible;
+      }
+    }
+  }
+
+  drawEdges(ctx) {
+    ctx.save();ctx.lineWidth=.65;ctx.lineJoin='round';
+    for(let i=0;i<this.outlines.length;i++){
+      ctx.strokeStyle='rgb('+this.palette[i].map(v=>Math.round(v*.68)).join(',')+')';
+      ctx.stroke(this.outlines[i]);
+    }
+    ctx.restore();
+  }
+
   shade(frame, palette) {
     const dir=frame.direction,daylight=dir[2]>0;
     const light=daylight?this.lighting(dir):null;
     const colors=this.colors;
+    this.shadowRamps??=[];
     for(let i=0;i<this.faces.length;i++) {
       const spans=this.spans[i];if(!spans.length)continue;
       const face=this.faces[i],sun=daylight?Math.max(0,SunOrbit.dot(face.normal,dir)):0;
@@ -272,6 +371,17 @@ class SunOrbit {
       }
       const contrast=.21*Math.min(1,sun/.025,dir[2]/.013);
       const shaded=SunOrbit.color(base,gain*(1-contrast)),size=light.size,depth=light.depth;
+      // Interpolate visibility, not depths: a roof and the distant receiver
+      // behind its silhouette must never average into an imaginary blocker.
+      let ramp=this.shadowRamps[i];
+      if(!ramp || ramp[0]!==lit || ramp[32]!==shaded){
+        if(!ramp)ramp=this.shadowRamps[i]=new Uint32Array(33);
+        ramp.fill(0xff000000);
+        for(const shift of [0,8,16]){
+          const bright=(lit>>>shift)&255,dark=(shaded>>>shift)&255;
+          for(let n=0;n<=32;n++)ramp[n]|=Math.round(bright+(dark-bright)*n/32)<<shift;
+        }
+      }
       const {ux,vx}=this.gradients[i],a=light.positions[face.ids[0]],b=light.positions[face.ids[1]],c=light.positions[face.ids[2]];
       const bx=b[0]-a[0],by=b[1]-a[1],bz=b[2]-a[2],cx=c[0]-a[0],cy=c[1]-a[1],cz=c[2]-a[2];
       const stepX=ux*bx+vx*cx,stepY=ux*by+vx*cy,stepZ=ux*bz+vx*cz;
@@ -280,18 +390,23 @@ class SunOrbit {
         const end=spans[j+1],u=spans[j+2],v=spans[j+3];
         let sx=a[0]+u*bx+v*cx,sy=a[1]+u*by+v*cy,sz=a[2]+u*bz+v*cz;
         for(let k=spans[j];k<end;k++,sx+=stepX,sy+=stepY,sz+=stepZ){
-          // All solar projections lie within the padded shadow atlas. Compare
-          // at the texel centre so grazing rays do not stripe flat surfaces.
-          const x=Math.floor(sx),y=Math.floor(sy);
-          const z=sz+(x+.5-sx)*slX+(y+.5-sy)*slY;
-          colors[k]=depth[y*size+x]>z+.035?shaded:lit;
+          // A depth entry describes its texel centre. Correct the receiver
+          // depth independently at all four centres, including on sloped
+          // walls. The atlas has a two-texel border around every projection.
+          const x=Math.floor(sx-.5),y=Math.floor(sy-.5);
+          const fx=sx-.5-x,fy=sy-.5-y,index=y*size+x;
+          const z=sz+.035-fx*slX-fy*slY;
+          const a=Number(depth[index]>z),b=Number(depth[index+1]>z+slX);
+          const c=Number(depth[index+size]>z+slY),d=Number(depth[index+size+1]>z+slX+slY);
+          if(a===b && a===c && a===d)colors[k]=a?shaded:lit;
+          else {
+            const upper=a+fx*(b-a),lower=c+fx*(d-c);
+            colors[k]=ramp[Math.round(32*(upper+fy*(lower-upper)))];
+          }
         }
       }
     }
-    for(let i=0;i<this.edgeSpans.length;i++){
-      const edges=this.edgeSpans[i],color=SunOrbit.color(palette[i],.68);
-      for(let j=0;j<edges.length;j+=2)colors.fill(color,edges[j],edges[j+1]);
-    }
+    for(let i=0;i<this.rim.length;i+=2)colors[this.rim[i]]=colors[this.rim[i+1]];
   }
 
   // Keep the depth-tested shadow calculation identical on both paths. During
@@ -346,7 +461,7 @@ class SunOrbit {
       };
       worker.onerror=()=>this.stopShadingWorker();
       worker.onmessageerror=()=>this.stopShadingWorker();
-      worker.postMessage({geometry:{vertices:this.vertices,faces:this.faces,edges:this.edges},ownerCount:this.owners.length});
+      worker.postMessage({geometry:{vertices:this.vertices,faces:this.faces,vectorClip:this.vectorClip,shadowGrid:this.shadowGrid},ownerCount:this.owners.length});
       return true;
     } catch {
       this.stopShadingWorker();
@@ -435,7 +550,11 @@ class SunOrbit {
       this.ctx.putImageData(this.pixels,0,0);
       this.shadeKey=shadeKey;
     }
-    if(context)context.drawImage(this.layer,0,0,cssW,cssH);
+    if(context){
+      context.save();context.clip(new Path2D(this.silhouette));
+      context.drawImage(this.layer,0,0,cssW,cssH);context.restore();
+      this.drawEdges(context);
+    }
     return this.view;
   }
 

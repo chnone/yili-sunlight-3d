@@ -470,7 +470,7 @@ function cachedLayer(id,key,paintLayer){
  const {canvas,ctx}=slot;
  if(canvas.hidden)canvas.hidden=false;
  if(slot.key===key)return;
- const dpr=Math.min(2,devicePixelRatio||1);
+ const dpr=Math.min(id==='annotations'&&c.clientWidth<=640?3:2,devicePixelRatio||1);
  const wp=Math.round(c.clientWidth*dpr),hp=Math.round(c.clientHeight*dpr);
  if(canvas.width!==wp||canvas.height!==hp){canvas.width=wp;canvas.height=hp}
  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,c.clientWidth+1,c.clientHeight+1);
@@ -497,9 +497,12 @@ function winnerMarkers(day){
  const result={counts,windows};winnerGeometry.set(day,result);return result;
 }
 function draw(sky){
- const w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;const dpr=Math.min(selected.playing||c.classList.contains('dragging')?1:1.5,devicePixelRatio||1);
+ const w=c.clientWidth,h=c.clientHeight;if(!w||!h)return;
+ // Keep moving ground-shadow edges at the same Retina resolution on phones, including during gestures.
+ const moving=selected.playing||c.classList.contains('dragging');
+ const dpr=Math.min(devicePixelRatio||1,w<=640?2:moving?1:1.5);
  if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr)}
- g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w+1,h+1);
+ g.setTransform(c.width/w,0,0,c.height/h,0,0);g.clearRect(0,0,w,h);
  const {s,P}=viewing(w,h),iso=selected.view==='iso',siteOnly=selected.scope==='site',active=byId.get(selected.bid);
  const ds=sc.days[selected.day],f=sky?.direction?sky:currentSky(ds),dir=f.direction,level=selected.floor,ref=iso?0:active.sill_base+(level-1)*active.floor_height;
  const cam=iso?orbit.camera:planCam;
@@ -625,7 +628,10 @@ function draw(sky){
      drawBridgeAxis(body);
      planHits.push({path,bid:b.id});
    }
-   }else bodies.filter(body=>body.owner.kind==='bridge').forEach(drawBridgeAxis);
+   }else{
+     orbit.drawEdges(g);
+     bodies.filter(body=>body.owner.kind==='bridge').forEach(drawBridgeAxis);
+   }
  const winnerBuildings=winners?[...winners.counts.keys()].map(id=>byId.get(id)):[];
  const labels=[...winnerBuildings,byId.get(selected.bid),...(sideView==='ext'?[byId.get(exterior)]:[]),...homes,...bridges,...externals];
  [...new Set(labels.filter(Boolean))].forEach(labelBuilding);
@@ -733,12 +739,17 @@ function refreshPlayback(){
  button.setAttribute('aria-label',selected.playing?'暂停动画':'播放动画');
 }
 const minutesPerSecond=8;
+// A delayed browser frame must not make the shadow leap across the site when drawing resumes.
+const maxPlaybackStepMs=1000/30;
 function animate(timestamp){
  animationId=0;
  if(document.hidden)return;
  if(selected.playing){
    const day=sc.days[selected.day];
-   if(lastTick!==null)selected.minute=Math.min(day.end,selected.minute+(timestamp-lastTick)*.001*minutesPerSecond*selected.speed);
+   if(lastTick!==null){
+     const elapsedMs=Math.min(maxPlaybackStepMs,Math.max(0,timestamp-lastTick));
+     selected.minute=Math.min(day.end,selected.minute+elapsedMs*.001*minutesPerSecond*selected.speed);
+   }
    lastTick=timestamp;
    if(selected.minute>=day.end){selected.playing=false;lastTick=null;refreshPlayback()}
  }
