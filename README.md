@@ -12,6 +12,7 @@
 
 - [逐窗台明细](output/sunlight_details.csv) · [逐户汇总](output/sunlight_households.csv) · [选房报告](output/采光选房排雷报告.md)
 - [楼位校验图](charts/00_layout_verification.png) · [大寒热力图](charts/01_dahan_heatmap.png) · [冬至热力图](charts/02_dongzhi_heatmap.png) · [楼栋对比](charts/03_sunlight_summary_ranking.png)
+- 日出至日落的[大寒全天热力图](charts/04_dahan_daylight_heatmap.png)和[冬至全天热力图](charts/05_dongzhi_daylight_heatmap.png)覆盖全部 13 栋。户均采用动画榜单的 1 分钟复算，A、B 对应动画窗台卡的 5 分钟累计。[全天逐户明细](output/全天日照逐户明细.csv)
 - [冬至回放视频](output/一里冬至日照动画.mp4) · [10、11 号楼每层六户对照](output/10-11号楼_六户对照/)
 
 ## 重算
@@ -27,6 +28,7 @@ python -B scripts/simulate_sunlight.py
 python -B scripts/sun_layout_variant.py
 python -B scripts/plot_heatmaps.py
 python -B scripts/build_sun_animation.py --html-only
+python -B scripts/plot_daylight_heatmaps.py
 ```
 
 生成冬至视频需安装含 libx264 的 FFmpeg，再运行 `python -B scripts/build_sun_animation.py`。绘图及视频需要中文字体，可通过 `SUNLIGHT_FONT` 指定字体文件。重新制作楼位校验图时，将下列官方 PDF 下载到根目录并命名为 `plan.pdf`，安装 Poppler 后运行 `python -B scripts/plot_layout_check.py`。
