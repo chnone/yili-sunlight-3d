@@ -28,6 +28,7 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 .day-nav{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.rank-link{color:var(--blue);font-size:13px;text-underline-offset:3px}
 .door-fields{margin:8px 0 16px}.door-fields select:disabled{opacity:1;color:var(--ink);background:#f2f5f3}
 .day-results{grid-column:1 / -1}.day-results>details{margin:0;padding:12px 17px}
+.heatmap-links{display:flex;flex-wrap:wrap;align-items:center;gap:0 16px;padding:4px 17px;border-top:1px solid var(--line);font-size:14px}.heatmap-links a{display:inline-flex;align-items:center;min-height:44px;color:var(--blue);text-underline-offset:3px}
 #rankings{padding:17px;scroll-margin-top:12px}#rankings h2{font-size:17px}
 .rank-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
 #highlightFirst{flex:none;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;min-height:34px;color:#7d2049;background:#fff8fb;border:1px solid #cb9aaf;border-radius:5px;font-size:13px;font-weight:600}
@@ -75,6 +76,7 @@ details{margin-top:14px;border-top:1px solid var(--line);padding-top:10px;color:
 <button id="rankMore" type="button" aria-controls="rankList" aria-expanded="false" hidden></button>
 <p class="rank-method" id="rankMethod"></p>
 </section>
+<nav class="heatmap-links" aria-label="全天热力图"><strong>全天热力图</strong><a href="../charts/04_dahan_daylight_heatmap.png" aria-label="大寒全天热力图">大寒</a><a href="../charts/05_dongzhi_daylight_heatmap.png" aria-label="冬至全天热力图">冬至</a></nav>
 <details class="method-block"><summary>计算口径</summary>
 <h3>时间与采样</h3><p>回放使用北京时间，从日出到日落。窗台卡片按每个 5 分钟区间的中点判断直射，日出日落和太阳中心过地平线附近的短区间单独计算。日出日落按太阳上缘计算，测光射线指向太阳中心。</p>
 <div id="clockComparison"></div>
